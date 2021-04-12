@@ -81,6 +81,6 @@ export function poxAddrCV(stxAddress) {
 export function poxCVToBtcAddress(poxAddrCV) {
   return address.toBase58Check(
     poxAddrCV.data.hashbytes.buffer,
-    addressHashModeToBtcVersion(poxAddrCV.data.version.buffer.valueOf()[0], false)
+    addressHashModeToBtcVersion(poxAddrCV.data.version.buffer.valueOf()[0], true)
   );
 }

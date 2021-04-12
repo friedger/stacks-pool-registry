@@ -18,12 +18,12 @@ export default function PoolInfo({ pool }) {
       <p>
         {contractId}
         <br />
-        {pool.data['locking-period'].type === ClarityType.OptionalSome
-          ? `Locking for ${cvToString(pool.data['locking-period'].value)} cycles.`
+        {pool.data['locking-period'].type === ClarityType.List
+          ? `Locking for ${pool.data['locking-period'].list.map(lp => lp.value.toString(10)).join(", ")} cycles.`
           : 'Variable locking period'}
         <br />
         {pool.data['minimum-ustx'].type === ClarityType.OptionalSome
-          ? `${pool.data['minimum-ustx'].value.value.toNumber() / 1000000} STX`
+          ? `${pool.data['minimum-ustx'].value.value.toNumber()} STX`
           : 'No minimum STX required'}
         <br />
         {
