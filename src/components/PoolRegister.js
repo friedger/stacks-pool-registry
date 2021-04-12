@@ -1,6 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
 
-import { CONTRACT_ADDRESS, GENESIS_CONTRACT_ADDRESS, NETWORK, POOL_REGISTRY_CONTRACT_NAME } from '../lib/constants';
+import {
+  CONTRACT_ADDRESS,
+  GENESIS_CONTRACT_ADDRESS,
+  NETWORK,
+  POOL_REGISTRY_CONTRACT_NAME,
+} from '../lib/constants';
 import { TxStatus } from '../lib/transactions';
 import { fetchAccount } from '../lib/account';
 import { useConnect } from '@stacks/connect-react';
@@ -78,10 +83,10 @@ export function PoolRegister({ ownerStxAddress, username }) {
       minimumCV = noneCV();
     }
 
-    console.log(lockingPeriod.current.value.trim())
-    console.log(lockingPeriod.current.value.split(",").map(lp => uintCV(parseInt(lp.trim()))))
+    console.log(lockingPeriod.current.value.trim());
+    console.log(lockingPeriod.current.value.split(',').map(lp => uintCV(parseInt(lp.trim()))));
     const lockingPeriodCV = lockingPeriod.current.value.trim()
-      ? listCV(lockingPeriod.current.value.split(",").map(lp => uintCV(parseInt(lp.trim()))))
+      ? listCV(lockingPeriod.current.value.split(',').map(lp => uintCV(parseInt(lp.trim()))))
       : listCV([]);
     const payoutCV = stringAsciiCV(payout.current.value.trim());
     const dateOfPayoutCV = stringAsciiCV(dateOfPayout.current.value.trim());
@@ -138,7 +143,14 @@ export function PoolRegister({ ownerStxAddress, username }) {
     <div>
       <h5>Register a pool</h5>
       <div className="NoteField">
-        Pool's name, e.g. alice.id (must contain 1 dot)
+        <b>Pool admin's user name</b>
+        <br />
+        A BNS name that is used to protect pool's data. Only the owner of this name can update the
+        data. The name must contain exactly 1 dot. e.g. alice.id. Subdomain names are not supported
+        by the UI.
+        <br />
+        The name is registered and paid for during the `register` function call if not yet owned by
+        the caller. (Costs around 0.1 STX for friedgerpool.id)
         <input
           type="text"
           ref={name}
@@ -152,6 +164,8 @@ export function PoolRegister({ ownerStxAddress, username }) {
             setStatus(undefined);
           }}
         />
+        <br />
+        <b>Delegatee address</b>
         <br />
         Pool's Stacks address for delegation
         <input
@@ -168,7 +182,7 @@ export function PoolRegister({ ownerStxAddress, username }) {
           }}
         />
         <br />
-        Pool's Website
+        <b>Pool's Website</b>
         <input
           type="text"
           ref={url}
@@ -183,7 +197,9 @@ export function PoolRegister({ ownerStxAddress, username }) {
           }}
         />
         <br />
-        Reward BTC address
+        <b>Reward BTC addresses</b>
+        <br />
+        One or more BTC addresses, comma separated list
         <input
           type="text"
           ref={rewardBtcAddress}
@@ -198,7 +214,9 @@ export function PoolRegister({ ownerStxAddress, username }) {
           }}
         />
         <br />
-        Contract ID
+        <b>Contract ID</b>
+        <br />
+        This could be the genesis pox contract or a custom pool contract.
         <input
           type="text"
           ref={contract}
@@ -212,6 +230,7 @@ export function PoolRegister({ ownerStxAddress, username }) {
             setStatus(undefined);
           }}
         />
+        <br />
         <input
           name="extendedContract"
           type="checkbox"
@@ -226,9 +245,16 @@ export function PoolRegister({ ownerStxAddress, username }) {
             setStatus(undefined);
           }}
         />
-        <label htmlFor="extendedContract">Extended Contract</label>
+        <label htmlFor="extendedContract">
+          <b>Extended Contract</b>
+        </label>
         <br />
-        Minimum STX required to join
+        Check this box if the pool uses a pool contract with the extended trait. The extended trait
+        has a `delegte-stx` function that allows users to specify the user's reward address and the
+        locking period.
+        <br />
+        <br />
+        <b>Minimum STX</b> required to join
         <input
           type="number"
           ref={minimum}
@@ -243,8 +269,9 @@ export function PoolRegister({ ownerStxAddress, username }) {
           }}
         />
         <br />
-        Locking period/number of locking cycles (comma separated list of cycles). Leave empty if
-        variable.
+        <b>Locking period</b>
+        <br />
+        Number of locking cycles (comma separated list of cycles). Leave empty if variable.
         <input
           type="text"
           ref={lockingPeriod}
@@ -258,7 +285,8 @@ export function PoolRegister({ ownerStxAddress, username }) {
           }}
         />
         <br />
-        How the Pool payouts rewards
+        <b>Pool payouts</b> <br />
+        Currency of pool payouts
         <input
           type="text"
           ref={payout}
@@ -272,6 +300,8 @@ export function PoolRegister({ ownerStxAddress, username }) {
             setStatus(undefined);
           }}
         />
+        <br />
+        <b>Date of Payout</b>
         <br />
         When the Pool payouts rewards (optional, max 80 char.)
         <input
@@ -287,6 +317,8 @@ export function PoolRegister({ ownerStxAddress, username }) {
             setStatus(undefined);
           }}
         />
+        <br />
+        <b>Fees</b>
         <br />
         What are the fees (optional, max 80 char.)
         <input
