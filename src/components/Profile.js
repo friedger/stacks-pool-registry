@@ -39,7 +39,7 @@ export default function Profile({ stxAddresses, userSession }) {
       </div>
       <div className="text-center mt-2">
         Hello,{' '}
-        <span id="heading-name">{(person && person.name()) || username || 'Stacks Tester'}</span>!
+        <span id="heading-name">{(person && person.name()) || username || 'Stacker'}</span>!
       </div>
       {username && (
         <>
@@ -64,7 +64,7 @@ export default function Profile({ stxAddresses, userSession }) {
           showAddress
         ></StxProfile>
       </div>
-     
+
 
       {status && (
         <>
