@@ -62,7 +62,6 @@ export function PoolRegister({ ownerStxAddress, username }) {
   const registerAction = async () => {
     spinner.current.classList.remove('d-none');
     const useExt = extendedCheckbox.current.checked;
-    console.log({ useExt, c: extendedCheckbox.current });
     const usernameCV = nameToUsernameCV(name.current.value.trim());
     if (!usernameCV) {
       setStatus('username must contain exactly one dot (.)');
@@ -273,7 +272,9 @@ export function PoolRegister({ ownerStxAddress, username }) {
         <br />
         <b>Locking period</b>
         <br />
-        Number of locking cycles (comma separated list of cycles). Leave empty if variable.
+        Number of locking cycles (comma separated list of cycles). <br />
+        <del>Leave empty if variable.</del> At least one entry required due to{' '}
+        <a href="https://github.com/blockstack/stacks-wallet-web/issues/1111">#1111</a>.
         <input
           type="text"
           ref={lockingPeriod}
