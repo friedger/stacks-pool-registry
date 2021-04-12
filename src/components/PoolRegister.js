@@ -74,7 +74,9 @@ export function PoolRegister({ ownerStxAddress, username }) {
       delegateeParts.length === 1
         ? standardPrincipalCV(delegateeParts[0])
         : contractPrincipalCV(delegateeParts[0], delegateeParts[1]);
-    const poxAddressCV = listCV([poxAddrCVFromBitcoin(rewardBtcAddress.current.value.trim())]);
+    const poxAddressCV = listCV(
+      rewardBtcAddress.current.value.split(',').map(addr => poxAddrCVFromBitcoin(addr.trim()))
+    );
     const urlCV = stringAsciiCV(url.current.value.trim());
     let minimumCV;
     if (minimum.current.value) {
