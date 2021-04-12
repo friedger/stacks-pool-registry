@@ -1,0 +1,13 @@
+{
+  "name": "Pool Registry",
+  "description": "Find and join stacking pools to as quickly as possible",
+  "icons": [
+    {
+      "src": "pool-registry.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone"
+}
