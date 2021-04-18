@@ -37,7 +37,7 @@ export default function PoolDetails({ poolId, location, userSession }) {
           <div className="card-header">
             <h5 className="card-title">Instructions</h5>
             (Read the technical details at the{' '}
-            <a href="https://gitlab.com/riot.ai/clarity-pool-registry">source code repo</a>
+            <a href="https://github.com/friedger/stacks-pool-registry">source code repo</a>
             .)
           </div>
           <ul className="list-group list-group-flush">
