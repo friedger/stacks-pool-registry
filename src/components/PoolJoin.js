@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 
-import { authOrigin, NETWORK } from '../lib/constants';
+import { accountsApi, authOrigin, NETWORK } from '../lib/constants';
 import { TxStatus } from '../lib/transactions';
 import { fetchAccount } from '../lib/account';
 import { useConnect as useStacksJsConnect } from '@stacks/connect-react';
@@ -70,6 +70,7 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
   const spinner = useRef();
   const [status, setStatus] = useState();
   const [txId, setTxId] = useState();
+  const [stxBalance, setStxBalance] = useState();
 
   useEffect(() => {
     if (ownerStxAddress) {
@@ -82,6 +83,12 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
           setStatus(undefined);
           console.log({ acc });
         });
+      accountsApi.getAccountBalance({ principal: ownerStxAddress }).then(balance => {
+        const stxBalance = (parseInt(balance.stx.balance) - parseInt(balance.stx.locked)) / 1000000;
+        if (amount.current) {
+          amount.current.value = stxBalance;
+        }
+      });
     }
   }, [ownerStxAddress]);
 
@@ -99,10 +106,11 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
   const userPayoutAddress = getPayoutAddress(payout, ownerStxAddress);
 
   console.log({ poolData: pool.data });
+
   const joinAction = async () => {
     spinner.current.classList.remove('d-none');
 
-    const amountCV = uintCV(amount.current.value.trim());
+    const amountCV = uintCV(amount.current.value.trim() * 1000000); // convert to uSTX
     const durationCV = duration.current.value.trim()
       ? someCV(uintCV(duration.current.value.trim()))
       : noneCV();
@@ -146,7 +154,6 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
         <input
           type="number"
           ref={amount}
-          defaultValue={40000}
           className="form-control"
           placeholder="Amount in STX"
           onKeyUp={e => {
@@ -178,10 +185,10 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
           className="form-control"
           placeholder="Number of cycles"
           disabled={!useExt}
-          readOnly={pool && pool.data["locking-period"].type === ClarityType.List}
+          readOnly={pool && pool.data['locking-period'].type === ClarityType.List}
           defaultValue={
-            pool && pool.data["locking-period"].type === ClarityType.List
-              ? pool.data["locking-period"].list.map(lp => lp.value.toString(10)).join(" - ")
+            pool && pool.data['locking-period'].type === ClarityType.List
+              ? pool.data['locking-period'].list.map(lp => lp.value.toString(10)).join(' - ')
               : ''
           }
           onKeyUp={e => {

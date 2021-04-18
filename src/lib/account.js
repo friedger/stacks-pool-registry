@@ -8,6 +8,9 @@ import {
   bufferCVFromString,
   ClarityType,
   cvToString,
+  cvToHex,
+  standardPrincipalCV,
+  hexToCV,
 } from '@stacks/transactions';
 import { Storage } from '@stacks/storage';
 import { STX_JSON_PATH } from '../UserSession';
@@ -16,6 +19,7 @@ import {
   BNS_CONTRACT_NAME,
   GENESIS_CONTRACT_ADDRESS,
   NETWORK,
+  smartContractsApi,
   STACKS_API_ACCOUNTS_URL,
 } from './constants';
 
@@ -79,4 +83,21 @@ export function fetchAccount2(addressAsString) {
     console.log({ r });
     return r.json();
   });
+}
+
+export async function getUsername(addressAsString) {
+  const nameResult = await smartContractsApi.callReadOnlyFunction({
+    contractAddress: GENESIS_CONTRACT_ADDRESS,
+    contractName: 'bns',
+    functionName: 'resolve-principal',
+    readOnlyFunctionArgs: {
+      sender: addressAsString,
+      arguments: [cvToHex(standardPrincipalCV(addressAsString))],
+    },
+  });
+  if (nameResult.okay && nameResult.result !== '0x09') {
+    return hexToCV(nameResult.result).value;
+  } else {
+    return undefined;
+  }
 }

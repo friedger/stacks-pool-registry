@@ -42,7 +42,9 @@ export async function fetchPools(offset = 0) {
   return receipt.list.reduce((result, cv) => {
     if (cv.type === ClarityType.OptionalNone) return result;
     else {
-      result.push(cv.value);
+      const poolCV = cv.value;
+      poolCV.data['pool-id'] = idsCV[result.length];
+      result.push(poolCV);
       return result;
     }
   }, []);

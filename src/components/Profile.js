@@ -1,18 +1,42 @@
 import { getUserData } from '@stacks/connect-react';
 import { Person } from '@stacks/profile';
+
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { fetchAccount } from '../lib/account';
+import { fetchAccount, getUsername } from '../lib/account';
+import { useNavigate } from '@reach/router';
 import { STACK_API_URL } from '../lib/constants';
+import { fetchPools } from '../lib/pools';
 import { TxStatus } from '../lib/transactions';
+import PoolInfo from './PoolInfo';
 
 // Demonstrating BlockstackContext for legacy React Class Components.
 
 export default function Profile({ stxAddresses, userSession }) {
   const [status, setStatus] = useState('');
+  const [pools, setPools] = useState();
+  const [nameCV, setNameCV] = useState();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (stxAddresses.ownerStxAddress) {
+      fetchPools()
+        .then(async pools => {
+          setStatus(undefined);
+          console.log(pools);
+          setPools(pools);
+          setNameCV(await getUsername(stxAddresses.ownerStxAddress));
+        })
+        .catch(e => {
+          setStatus('Failed to get pools', e);
+          console.log(e);
+        });
+    }
+  }, [stxAddresses.ownerStxAddress]);
+
   if (!userSession || !stxAddresses.ownerStxAddress) {
     return <div>Loading</div>;
   }
-  console.log({ stxAddresses, userSession });
+
   const { userData } = getUserData(userSession);
   const person = userData && new Person(userData.profile);
   const username = userData && userData.username;
@@ -38,12 +62,16 @@ export default function Profile({ stxAddresses, userSession }) {
         />
       </div>
       <div className="text-center mt-2">
-        Hello,{' '}
-        <span id="heading-name">{(person && person.name()) || username || 'Stacker'}</span>!
+        Hello, <span id="heading-name">{(person && person.name()) || username || 'Stacker'}</span>!
       </div>
       {username && (
         <>
-          Your Blockstack username is {username} <br />
+          Your Blockstack username is{' '}
+          {username ||
+            `${nameCV.data['name'].buffer.toString()}.${nameCV.data[
+              'namespace'
+            ].buffer.toString()}`}{' '}
+          <br />
         </>
       )}
       <div className="pt-4">
@@ -65,7 +93,41 @@ export default function Profile({ stxAddresses, userSession }) {
         ></StxProfile>
       </div>
 
+      {pools &&
+        nameCV &&
+        pools
+          .filter(p => isPoolOwned(p, nameCV))
+          .map(p => (
+            <>
+              <PoolInfo pool={p} />
+              <div className="input-group ">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  onClick={() => {
+                    console.log(p.data['pool-id']);
+                    navigate(`/me/edit/${p.data['pool-id'].value.toNumber()}`, {
+                      state: { pool: p },
+                    });
+                  }}
+                >
+                  Edit Pool
+                </button>
+              </div>
+            </>
+          ))}
 
+      <div className="input-group ">
+        <button
+          className="btn btn-outline-secondary"
+          type="button"
+          onClick={() => {
+            navigate(`/me/register`);
+          }}
+        >
+          Register New Pool
+        </button>
+      </div>
       {status && (
         <>
           <br />
@@ -73,6 +135,15 @@ export default function Profile({ stxAddresses, userSession }) {
         </>
       )}
     </div>
+  );
+}
+
+function isPoolOwned(pool, nameCV) {
+  console.log({ nameCV, pool });
+  return (
+    nameCV.data['namespace'].buffer.toString() ===
+      pool.data.name.data.namespace.buffer.toString() &&
+    nameCV.data['name'].buffer.toString() === pool.data.name.data.name.buffer.toString()
   );
 }
 

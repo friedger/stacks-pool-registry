@@ -39,6 +39,7 @@ export function PoolRegister({ ownerStxAddress, username }) {
   const dateOfPayout = useRef();
   const fees = useRef();
   const extendedCheckbox = useRef();
+  const poolStatus = useRef();
 
   const spinner = useRef();
   const [status, setStatus] = useState();
@@ -77,11 +78,11 @@ export function PoolRegister({ ownerStxAddress, username }) {
       rewardBtcAddress.current.value.split(',').map(addr => poxAddrCVFromBitcoin(addr.trim()))
     );
     const urlCV = stringAsciiCV(url.current.value.trim());
-    let minimumCV;
+    let minimumUstxCV;
     if (minimum.current.value) {
-      minimumCV = someCV(uintCV(parseInt(minimum.current.value)));
+      minimumUstxCV = someCV(uintCV(parseInt(minimum.current.value) * 1000000));
     } else {
-      minimumCV = noneCV();
+      minimumUstxCV = noneCV();
     }
 
     console.log(lockingPeriod.current.value.trim());
@@ -94,7 +95,7 @@ export function PoolRegister({ ownerStxAddress, username }) {
     const feesCV = stringAsciiCV(fees.current.value.trim());
     const [poolCtrAddress, poolCtrName] = contract.current.value.trim().split('.');
     const contractCV = contractPrincipalCV(poolCtrAddress, poolCtrName);
-    const statusCV = uintCV(1);
+    const statusCV = uintCV(poolStatus.current.value);
     const functionName = useExt ? 'register-ext' : 'register';
     console.log({ functionName, lockingPeriodCV, poxAddressCV });
     try {
@@ -110,7 +111,7 @@ export function PoolRegister({ ownerStxAddress, username }) {
           poxAddressCV,
           urlCV,
           contractCV,
-          minimumCV,
+          minimumUstxCV,
           lockingPeriodCV,
           payoutCV,
           dateOfPayoutCV,
@@ -331,12 +332,33 @@ export function PoolRegister({ ownerStxAddress, username }) {
           defaultValue=""
           placeholder="e.g. 10%, 5 STX"
           onKeyUp={e => {
-            if (e.key === 'Enter') registerAction();
+            if (e.key === 'Enter') poolStatus.current.focus();
           }}
           onBlur={e => {
             setStatus(undefined);
           }}
         />
+        <br />
+        <b>Status</b>
+        <br />
+        One of "In development", "In production", "Open to join", "Closed for next cycle", "Retired"
+        <select
+          ref={poolStatus}
+          className="form-control"
+          defaultValue={'0'}
+          onKeyUp={e => {
+            if (e.key === 'Enter') registerAction();
+          }}
+          onBlur={e => {
+            setStatus(undefined);
+          }}
+        >
+          <option value="0">In development</option>
+          <option value="1">In production</option>
+          <option value="11">Open to join for next cycle</option>
+          <option value="21">Closed for next cycle</option>
+          <option value="99">Retired</option>
+        </select>
         <br />
         <div className="input-group-append">
           <button className="btn btn-outline-secondary" type="button" onClick={registerAction}>

@@ -9,6 +9,7 @@ export function PoolList({ ownerStxAddress }) {
   const [pools, setPools] = useState();
 
   useEffect(() => {
+    setStatus('Loading pools');
     fetchPools()
       .then(async pools => {
         setStatus(undefined);
@@ -31,9 +32,7 @@ export function PoolList({ ownerStxAddress }) {
       />
       {pools &&
         pools.map((pool, key) => {
-          return (
-            <Pool key={key} pool={pool} poolId={key + 1} />
-          );
+          return <Pool key={key} pool={pool} poolId={key + 1} />;
         })}
       {!pools && <>No pools yet. Register one!</>}
       {status && (
