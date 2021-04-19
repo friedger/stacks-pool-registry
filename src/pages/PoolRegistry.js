@@ -20,9 +20,6 @@ export default function PoolRegistry(props) {
         <div className="card col-md-8 mx-auto mt-5 mb-5 text-center px-0 border-warning">
           <div className="card-header">
             <h5 className="card-title">Instructions</h5>
-            (Read the technical details at the{' '}
-            <a href="https://github.com/friedger/stacks-pool-registry">source code repo</a>
-            .)
           </div>
           <ul className="list-group list-group-flush">
             <li className="list-group-item">Select the pool you trust</li>
