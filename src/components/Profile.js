@@ -53,6 +53,7 @@ export default function Profile({ stxAddresses, userSession }) {
   const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
   const proxyUrl = url => '/proxy/' + url.replace(/^https?:\/\//i, '');
 
+  console.log(nameCV);
   return (
     <div className="Profile">
       <div className="avatar-section text-center">
