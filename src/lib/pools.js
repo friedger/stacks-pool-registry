@@ -2,7 +2,9 @@ import {
   bufferCVFromString,
   callReadOnlyFunction,
   ClarityType,
+  falseCV,
   listCV,
+  trueCV,
   tupleCV,
   uintCV,
 } from '@stacks/transactions';
@@ -28,7 +30,8 @@ export async function fetchPool(poolId) {
   }
 }
 
-export async function fetchPools(offset = 0) {
+export async function fetchPools({ verify = false, offset = 0 }) {
+  console.log({ verify, offset });
   const idsCV = [...Array(10).keys()].map(i => uintCV(i + 1 + offset));
   const receipt = await callReadOnlyFunction({
     contractAddress,
@@ -38,13 +41,33 @@ export async function fetchPools(offset = 0) {
     network: NETWORK,
     senderAddress: contractAddress,
   });
-  console.log(receipt.list);
-  return receipt.list.reduce((result, cv) => {
-    if (cv.type === ClarityType.OptionalNone) return result;
-    else {
-      const poolCV = cv.value;
-      poolCV.data['pool-id'] = idsCV[result.length];
-      result.push(poolCV);
+
+  const verifiedPools = await Promise.all(
+    receipt.list.map(async (cv, index) => {
+      if (cv.type === ClarityType.OptionalNone) {
+        return cv;
+      } else {
+        const poolCV = cv.value;
+        poolCV.data['pool-id'] = idsCV[index];
+        if (verify) {
+          const verified = await verifyUrl(
+            poolCV.data.url.data,
+            usernameCVToName(poolCV.data.name)
+          );
+          poolCV.data['verified'] = verified ? trueCV() : falseCV();
+          return poolCV;
+        } else {
+          return poolCV;
+        }
+      }
+    })
+  );
+
+  return verifiedPools.reduce((result, cv) => {
+    if (cv.type === ClarityType.OptionalNone) {
+      return result;
+    } else {
+      result.push(cv);
       return result;
     }
   }, []);
@@ -58,5 +81,33 @@ export function nameToUsernameCV(fullQualifiedName) {
     return tupleCV({ name: bufferCVFromString(name), namespace: bufferCVFromString(namespace) });
   } else {
     return undefined;
+  }
+}
+
+export function usernameCVToName(usernameCV) {
+  return `${usernameCV.data.name.buffer.toString()}.${usernameCV.data.namespace.buffer.toString()}`;
+}
+
+const whiteListedUrls = {
+  'https://pool.friedger.de': 'friedgerpool.id',
+};
+
+export async function verifyUrl(url, username) {
+  const whiteListedUsername = whiteListedUrls[url];
+  if (whiteListedUsername) {
+    return whiteListedUsername === username;
+  } else {
+    try {
+      const result = await fetch(url + '/manifest.json');
+      const manifest = await result.json();
+      console.log({ manifest, username }, manifest.author === username);
+      if (manifest.author) {
+        whiteListedUrls[url] = manifest.author;
+      }
+      return manifest.author === username;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   }
 }

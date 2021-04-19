@@ -39,18 +39,12 @@ export default function PoolDetails({ poolId, location, userSession }) {
           </div>
           <ul className="list-group list-group-flush">
             <li className="list-group-item">
-              Wait a few minutes and refresh the account balance. You should see 500,000 uSTX more
-              on your account.
-            </li>
-            <li className="list-group-item">Select the pool you trust</li>
-            <li className="list-group-item">
               Enter the amount, duration, and reward address to define how you would like to stack
               and click delegate.
             </li>
             <li className="list-group-item">
-              Wait for the pool admin to do the necessary and collect your rewards
+              Wait for the pool admin to do the necessary and collect your rewards.
             </li>
-            <li className="list-group-item"></li>
           </ul>
         </div>
       </div>

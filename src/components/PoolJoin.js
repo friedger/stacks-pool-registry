@@ -150,7 +150,8 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
       <h5>Join the pool</h5>
       <PoolInfo pool={pool} />
       <div className="NoteField">
-        Choose an amount, how much you would like to "delegately" stack through this pool.
+        Choose an amount, how much you would like to "delegately" stack through this pool (can be
+        higher than your balance to compound future rewards if stacking indefinitely).
         <input
           type="number"
           step="any"

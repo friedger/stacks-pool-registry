@@ -5,7 +5,6 @@ import {
   GENESIS_CONTRACT_ADDRESS,
   NETWORK,
   POOL_REGISTRY_CONTRACT_NAME,
-  smartContractsApi,
 } from '../lib/constants';
 import { TxStatus } from '../lib/transactions';
 import { fetchAccount, getUsername } from '../lib/account';
@@ -17,7 +16,6 @@ import {
   contractPrincipalCV,
   cvToString,
   FungibleConditionCode,
-  hexToCV,
   listCV,
   makeStandardSTXPostCondition,
   noneCV,
@@ -29,10 +27,18 @@ import {
   uintCV,
 } from '@stacks/transactions';
 import * as c32 from 'c32check';
-import { fetchPool, nameToUsernameCV } from '../lib/pools';
+import { fetchPool, nameToUsernameCV, verifyUrl } from '../lib/pools';
 import { poxAddrCVFromBitcoin, poxCVToBtcAddress } from '../lib/pools-utils';
 import BN from 'bn.js';
 
+const ERR_NAME = 'Name must contain 1 dot.';
+const ERR_URL = 'Website url required!';
+const ERR_REWARD_ADDRESS_1 = 'At least one reward address required.';
+const ERR_INVALID_REWARD_ADDRESSES = 'Invalid Bitcoin address(es).';
+const ERR_INVALID_CONTRACT_ID = 'Invalid contract id.';
+const ERR_LOCKING_PERIOD_1 = 'At least one locking period required.';
+const ERR_INVALID_LOCKING_PERIODS = 'Locking periods must be numbers between 1 and 12.';
+const ERR_INVALID_STX_ADDRESS = 'Invalid STX address.';
 export function PoolForm({ ownerStxAddress, register, poolId }) {
   let title = 'Update pool';
   let formButtonLabel;
@@ -48,10 +54,10 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
   const priceInfo = useRef();
   const delegateeAddress = useRef();
   const url = useRef();
-  const rewardBtcAddress = useRef();
+  const rewardBtcAddresses = useRef();
   const contract = useRef();
   const minimum = useRef();
-  const lockingPeriod = useRef();
+  const lockingPeriods = useRef();
   const payout = useRef();
   const dateOfPayout = useRef();
   const fees = useRef();
@@ -104,19 +110,40 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
     let stxPostCondition;
     let priceBN;
 
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setStatus(
+        errors.map(e => (
+          <>
+            {e}
+            <br />
+          </>
+        ))
+      );
+      return;
+    } else {
+      setStatus(undefined);
+    }
+
     if (register) {
       functionName = useExt ? 'register-ext' : 'register';
       if (username) {
         priceBN = new BN(0);
       } else {
-        await checkPrice();
+        if (!price) {
+          await checkPrice();
+        }
         priceBN = new BN(price);
       }
     } else {
       functionName = useExt ? 'update-ext' : 'update';
       priceBN = new BN(0);
     }
-    console.log(priceBN.toNumber());
+
+    if (username && !(await checkUrl(url.current.value.trim(), username))) {
+      setStatus(`Website manifest.json must contain entry "author":"${username}"`);
+      return;
+    }
     stxPostCondition = makeStandardSTXPostCondition(
       ownerStxAddress,
       FungibleConditionCode.Equal,
@@ -126,7 +153,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
 
     const usernameCV = nameToUsernameCV(name.current.value.trim());
     if (!usernameCV) {
-      setStatus('username must contain exactly one dot (.)');
+      setStatus(ERR_NAME);
       return;
     }
     const delegateeParts = delegateeAddress.current.value.trim().split('.');
@@ -135,8 +162,8 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
       delegateeParts.length === 1
         ? standardPrincipalCV(delegateeParts[0])
         : contractPrincipalCV(delegateeParts[0], delegateeParts[1]);
-    const poxAddressCV = listCV(
-      rewardBtcAddress.current.value.split(',').map(addr => poxAddrCVFromBitcoin(addr.trim()))
+    const poxAddressesCV = listCV(
+      rewardBtcAddresses.current.value.split(',').map(addr => poxAddrCVFromBitcoin(addr.trim()))
     );
     const urlCV = stringAsciiCV(url.current.value.trim());
     let minimumUstxCV;
@@ -146,12 +173,12 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
       minimumUstxCV = noneCV();
     }
 
-    if (!lockingPeriod.current.value.trim()) {
+    if (!lockingPeriods.current.value.trim()) {
       setStatus('Locking Period required.');
       return;
     }
-    const lockingPeriodCV = lockingPeriod.current.value.trim()
-      ? listCV(lockingPeriod.current.value.split(',').map(lp => uintCV(parseInt(lp.trim()))))
+    const lockingPeriodsCV = lockingPeriods.current.value.trim()
+      ? listCV(lockingPeriods.current.value.split(',').map(lp => uintCV(parseInt(lp.trim()))))
       : listCV([]);
     const payoutCV = stringAsciiCV(payout.current.value.trim());
     const dateOfPayoutCV = stringAsciiCV(dateOfPayout.current.value.trim());
@@ -159,7 +186,10 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
     const [poolCtrAddress, poolCtrName] = contract.current.value.trim().split('.');
     const contractCV = contractPrincipalCV(poolCtrAddress, poolCtrName);
     const statusCV = uintCV(poolStatus.current.value);
-    console.log({ functionName, lockingPeriodCV, poxAddressCV });
+    if (!(await checkContract(poolCtrAddress, poolCtrName, useExt))) {
+      setStatus('Contract does not satisfy trait');
+    }
+    console.log({ functionName, lockingPeriodCV: lockingPeriodsCV, poxAddressCV: poxAddressesCV });
     try {
       setStatus(`Sending transaction`);
 
@@ -170,11 +200,11 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
         functionArgs: [
           usernameCV,
           delegateeCV,
-          poxAddressCV,
+          poxAddressesCV,
           urlCV,
           contractCV,
           minimumUstxCV,
-          lockingPeriodCV,
+          lockingPeriodsCV,
           payoutCV,
           dateOfPayoutCV,
           feesCV,
@@ -217,8 +247,94 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
         priceInfo.current.innerHTML = 'No price info found.';
       }
     } else {
-      priceInfo.current.innerHTML = 'Name needs to contain 1 dot.';
+      priceInfo.current.innerHTML = ERR_NAME;
     }
+  };
+
+  const checkContract = (ctrAddress, ctrName, useExt) => {
+    return true;
+  };
+
+  const checkUrl = async (url, username) => {
+   return verifyUrl(url, username)
+  };
+
+  const validateForm = () => {
+    const errors = [];
+    // username
+    if (name.current.value.trim().split('.').length !== 2) {
+      name.current.setCustomValidity(ERR_NAME);
+      errors.push(ERR_NAME);
+    } else {
+      name.current.setCustomValidity('');
+    }
+
+    // website
+    if (!url.current.value.trim()) {
+      url.current.setCustomValidity(ERR_URL);
+      errors.push(ERR_URL);
+    } else {
+      url.current.setCustomValidity('');
+    }
+
+    // delegatee address
+    try {
+      console.log(delegateeAddress.current.value.trim());
+      c32.c32addressDecode(delegateeAddress.current.value.trim());
+      delegateeAddress.current.setCustomValidity('');
+    } catch (e) {
+      delegateeAddress.current.setCustomValidity(ERR_INVALID_STX_ADDRESS + ' ' + e.toString());
+      errors.push(ERR_INVALID_STX_ADDRESS);
+    }
+
+    // reward addresses
+    const addrList = rewardBtcAddresses.current.value.split(',');
+    if (addrList.length === 0) {
+      rewardBtcAddresses.setCustomValidity(ERR_REWARD_ADDRESS_1);
+      errors.push(ERR_REWARD_ADDRESS_1);
+    } else if (
+      !addrList.reduce((result, addr) => {
+        try {
+          c32.b58ToC32(addr.trim());
+          return result;
+        } catch (e) {
+          console.log(addr, e)
+          return false;
+        }
+      }, true)
+    ) {
+      rewardBtcAddresses.current.setCustomValidity(ERR_INVALID_REWARD_ADDRESSES);
+      errors.push(ERR_INVALID_REWARD_ADDRESSES);
+    } else {
+      rewardBtcAddresses.current.setCustomValidity('');
+    }
+
+    // contract
+    const [ctrAddr, ctrName] = contract.current.value.trim().split('.');
+    if (!ctrAddr || !ctrName) {
+      contract.current.setCustomValidity(ERR_INVALID_CONTRACT_ID);
+      errors.push(ERR_INVALID_CONTRACT_ID);
+    } else {
+      contract.current.setCustomValidity('');
+    }
+
+    // locking period
+    const lockingPeriodList = lockingPeriods.current.value.split(',');
+    if (lockingPeriodList.length === 0) {
+      lockingPeriods.current.setCustomValidity(ERR_LOCKING_PERIOD_1);
+      errors.push(ERR_LOCKING_PERIOD_1);
+    } else if (
+      !lockingPeriodList.reduce((result, lp) => {
+        const period = parseInt(lp.trim());
+        return result && !isNaN(period) && period >= 1 && period <= 12;
+      }, true)
+    ) {
+      lockingPeriods.current.setCustomValidity(ERR_INVALID_LOCKING_PERIODS);
+      errors.push(ERR_INVALID_LOCKING_PERIODS);
+    } else {
+      lockingPeriods.current.setCustomValidity('');
+    }
+    return errors;
   };
 
   return (
@@ -235,6 +351,9 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               <br />
               The name is registered and paid for during the `register` function call if not yet
               owned by the caller. (Costs around 0.1 STX for friedgerpool.id)
+              <br />
+              After successful registration of the name, add the name to your website's
+              manifest.json file as "author".
             </>
           )}
           <input
@@ -248,11 +367,11 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               if (e.key === 'Enter') delegateeAddress.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           {register && (
-            <div className="input-group-append" style={{ 'align-items': 'center' }}>
+            <div className="input-group-append" style={{ alignItems: 'center' }}>
               <button className="btn btn-outline-secondary" type="button" onClick={checkPrice}>
                 <div
                   ref={spinner}
@@ -277,8 +396,9 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
             onKeyUp={e => {
               if (e.key === 'Enter') url.current.focus();
             }}
+            required
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <br />
@@ -289,11 +409,12 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
             className="form-control"
             defaultValue={register ? '' : pool.data['url'].data}
             placeholder="Url"
+            required
             onKeyUp={e => {
-              if (e.key === 'Enter') rewardBtcAddress.current.focus();
+              if (e.key === 'Enter') rewardBtcAddresses.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <br />
@@ -302,7 +423,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
           One or more BTC addresses, comma separated list
           <input
             type="text"
-            ref={rewardBtcAddress}
+            ref={rewardBtcAddresses}
             className="form-control"
             defaultValue={
               register
@@ -314,7 +435,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               if (e.key === 'Enter') contract.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <br />
@@ -337,7 +458,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               if (e.key === 'Enter') extendedCheckbox.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <br />
@@ -354,7 +475,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               if (e.key === 'Enter') minimum.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <label htmlFor="extendedContract">
@@ -382,10 +503,10 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
             }
             placeholder="Minimum STX required for joining"
             onKeyUp={e => {
-              if (e.key === 'Enter') lockingPeriod.current.focus();
+              if (e.key === 'Enter') lockingPeriods.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <br />
@@ -396,7 +517,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
           <a href="https://github.com/blockstack/stacks-wallet-web/issues/1111">#1111</a>.
           <input
             type="text"
-            ref={lockingPeriod}
+            ref={lockingPeriods}
             className="form-control"
             placeholder="e.g. 1, 12"
             defaultValue={
@@ -408,7 +529,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               if (e.key === 'Enter') payout.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <br />
@@ -424,7 +545,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               if (e.key === 'Enter') dateOfPayout.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           >
             <option value="BTC">BTC</option>
@@ -440,11 +561,12 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
             className="form-control"
             defaultValue={register ? '' : pool.data['date-of-payout'].data}
             placeholder="e.g. end of cycle, instant"
+            maxlength="80"
             onKeyUp={e => {
               if (e.key === 'Enter') fees.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <br />
@@ -457,11 +579,12 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
             className="form-control"
             defaultValue={register ? '' : pool.data['fees'].data}
             placeholder="e.g. 10%, 5 STX"
+            maxlength="80"
             onKeyUp={e => {
               if (e.key === 'Enter') poolStatus.current.focus();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           />
           <br />
@@ -477,7 +600,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               if (e.key === 'Enter') formAction();
             }}
             onBlur={e => {
-              setStatus(undefined);
+              validateForm();
             }}
           >
             <option value="0">In development (0)</option>

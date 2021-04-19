@@ -19,7 +19,7 @@ export default function Profile({ stxAddresses, userSession }) {
   useEffect(() => {
     setLoading(true);
     if (stxAddresses.ownerStxAddress) {
-      fetchPools()
+      fetchPools({})
         .then(async pools => {
           setStatus(undefined);
           console.log(pools);

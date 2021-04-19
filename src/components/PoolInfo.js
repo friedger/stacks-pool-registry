@@ -1,4 +1,5 @@
 import { ClarityType, cvToString } from '@stacks/transactions';
+import { usernameCVToName } from '../lib/pools';
 import { poxCVToBtcAddress } from '../lib/pools-utils';
 
 export default function PoolInfo({ pool }) {
@@ -11,18 +12,22 @@ export default function PoolInfo({ pool }) {
     <>
       <h5>
         {pool.data.url.data ? (
-          <a href={pool.data.url.data}>
-            {pool.data.name.data.name.buffer.toString()}.
-            {pool.data.name.data.namespace.buffer.toString()}
-          </a>
+          <a href={pool.data.url.data}>{usernameCVToName(pool.data.name)}</a>
         ) : (
+          <>{usernameCVToName(pool.data.name)}</>
+        )}
+        {pool.data.verified && pool.data.verified.type === ClarityType.BoolTrue && (
           <>
-            {pool.data.name.data.name.buffer.toString()}.
-            {pool.data.name.data.namespace.buffer.toString()}
+            {' '}
+            <a href={`${pool.data.url.data}/manifest.json`}>
+              <img src="/verified.svg" alt="verified" width="16" />
+            </a>
           </>
         )}
       </h5>
       <p>
+        {cvToString(pool.data.delegatee)}
+        <br />
         {pool.data['locking-period'].type === ClarityType.List
           ? `Locking for ${pool.data['locking-period'].list
               .map(lp => lp.value.toString(10))
@@ -33,7 +38,7 @@ export default function PoolInfo({ pool }) {
           ? `Minimum amount required to join: ${
               pool.data['minimum-ustx'].value.value.toNumber() / 1000000
             } STX`
-          : 'No minimum STX required'}
+          : 'No minimum STX required.'}
         <br />
         Payout in {pool.data['payout'].data}.
         <br />
