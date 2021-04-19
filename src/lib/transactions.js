@@ -31,7 +31,7 @@ export function hexToCV(hexString) {
 }
 
 export function txUrl(txId) {
-  return `https://explorer.stacks.co/txid/0x${txId}?chain=testnet`;
+  return `https://explorer.stacks.co/txid/0x${txId}?chain=mainnet`;
 }
 
 export function TxStatus({ txId, resultPrefix }) {
@@ -85,7 +85,7 @@ export function TxStatus({ txId, resultPrefix }) {
       {processingResult.loading && (
         <>
           Checking transaction status:{' '}
-          <a href={`https://explorer.stacks.co/txid/${normalizedTxId}?chain=testnet`}>
+          <a href={`https://explorer.stacks.co/txid/${normalizedTxId}?chain=mainnet`}>
             {normalizedTxId}
           </a>
         </>

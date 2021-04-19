@@ -42,9 +42,6 @@ export default function PoolDetails({ poolId, location, userSession }) {
           </div>
           <ul className="list-group list-group-flush">
             <li className="list-group-item">
-              Claim test tokens from the faucet to get 500,000 uSTX.
-            </li>
-            <li className="list-group-item">
               Wait a few minutes and refresh the account balance. You should see 500,000 uSTX more
               on your account.
             </li>

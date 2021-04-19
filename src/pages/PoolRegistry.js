@@ -10,7 +10,7 @@ export default function PoolRegistry(props) {
     <main className="panel-welcome mt-5 container">
       <div className="lead row mt-5">
         <div className="col-xs-10 col-md-8 mx-auto px-4">
-          <h1 className="card-title">Pool Registry</h1>
+          <h1 className="card-title">List of public pools</h1>
         </div>
 
         <div className="col-xs-10 col-md-8 mx-auto mb-4 px-4">
@@ -25,11 +25,6 @@ export default function PoolRegistry(props) {
             .)
           </div>
           <ul className="list-group list-group-flush">
-            <li className="list-group-item">Claim test tokens from the faucet to get 500 STX.</li>
-            <li className="list-group-item">
-              Wait a few minutes and refresh the account balance. You should see 500,000 uSTX more
-              on your account.
-            </li>
             <li className="list-group-item">Select the pool you trust</li>
             <li className="list-group-item">
               Enter the amount, duration, and reward address to define how you would like to stack

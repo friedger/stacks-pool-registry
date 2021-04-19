@@ -4,9 +4,7 @@ import { Person } from '@stacks/profile';
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { fetchAccount, getUsername } from '../lib/account';
 import { useNavigate } from '@reach/router';
-import { STACK_API_URL } from '../lib/constants';
 import { fetchPools } from '../lib/pools';
-import { TxStatus } from '../lib/transactions';
 import PoolInfo from './PoolInfo';
 
 // Demonstrating BlockstackContext for legacy React Class Components.
@@ -16,8 +14,10 @@ export default function Profile({ stxAddresses, userSession }) {
   const [pools, setPools] = useState();
   const [nameCV, setNameCV] = useState();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     if (stxAddresses.ownerStxAddress) {
       fetchPools()
         .then(async pools => {
@@ -25,9 +25,11 @@ export default function Profile({ stxAddresses, userSession }) {
           console.log(pools);
           setPools(pools);
           setNameCV(await getUsername(stxAddresses.ownerStxAddress));
+          setLoading(false);
         })
         .catch(e => {
           setStatus('Failed to get pools', e);
+          setLoading(false);
           console.log(e);
         });
     }
@@ -64,7 +66,7 @@ export default function Profile({ stxAddresses, userSession }) {
       <div className="text-center mt-2">
         Hello, <span id="heading-name">{(person && person.name()) || username || 'Stacker'}</span>!
       </div>
-      {username && (
+      {(username || nameCV) && (
         <>
           Your Blockstack username is{' '}
           {username ||
@@ -93,31 +95,33 @@ export default function Profile({ stxAddresses, userSession }) {
         ></StxProfile>
       </div>
 
-      {pools &&
-        nameCV &&
-        pools
-          .filter(p => isPoolOwned(p, nameCV))
-          .map(p => (
-            <>
-              <PoolInfo pool={p} />
-              <div className="input-group ">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  onClick={() => {
-                    console.log(p.data['pool-id']);
-                    navigate(`/me/edit/${p.data['pool-id'].value.toNumber()}`, {
-                      state: { pool: p },
-                    });
-                  }}
-                >
-                  Edit Pool
-                </button>
+      {pools && nameCV && (
+        <div className="pt-4">
+          {pools
+            .filter(p => isPoolOwned(p, nameCV))
+            .map(p => (
+              <div className="pt-4">
+                <PoolInfo pool={p} />
+                <div className="input-group ">
+                  <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    onClick={() => {
+                      console.log(p.data['pool-id']);
+                      navigate(`/me/edit/${p.data['pool-id'].value.toNumber()}`, {
+                        state: { pool: p },
+                      });
+                    }}
+                  >
+                    Edit Pool
+                  </button>
+                </div>
               </div>
-            </>
-          ))}
-
-      <div className="input-group ">
+            ))}
+        </div>
+      )}
+      {loading && <>Getting your pools' data and BNS username...</>}
+      <div className="input-group pt-4">
         <button
           className="btn btn-outline-secondary"
           type="button"
@@ -148,9 +152,7 @@ function isPoolOwned(pool, nameCV) {
 }
 
 function StxProfile({ stxAddress, updateStatus, showAddress }) {
-  const [txId, setTxId] = useState();
   const spinner = useRef();
-  const faucetSpinner = useRef();
 
   const [profileState, setProfileState] = useState({
     account: undefined,
@@ -181,33 +183,6 @@ function StxProfile({ stxAddress, updateStatus, showAddress }) {
     });
   }, [stxAddress]);
 
-  const claimTestTokens = async stxAddr => {
-    updateStatus(undefined);
-    faucetSpinner.current.classList.remove('d-none');
-
-    fetch(`${STACK_API_URL}/extended/v1/faucets/stx?address=${stxAddr}`, {
-      method: 'POST',
-    })
-      .then(r => {
-        if (r.status === 200) {
-          r.json().then(faucetResponse => {
-            setTxId(faucetResponse.txId.substr(2));
-          });
-
-          updateStatus('Tokens will arrive soon.');
-        } else {
-          updateStatus('Claiming tokens failed.');
-        }
-        console.log(r);
-        faucetSpinner.current.classList.add('d-none');
-      })
-      .catch(e => {
-        updateStatus('Claiming tokens failed.');
-        console.log(e);
-        faucetSpinner.current.classList.add('d-none');
-      });
-  };
-
   return (
     <>
       {stxAddress && showAddress && (
@@ -217,7 +192,7 @@ function StxProfile({ stxAddress, updateStatus, showAddress }) {
       )}
       {profileState.account && (
         <>
-          You balance: {profileState.account.balance}uSTX.
+          Your balance: {(parseInt(profileState.account.balance) / 1000000).toFixed(6)} STX.
           <br />
         </>
       )}
@@ -234,25 +209,6 @@ function StxProfile({ stxAddress, updateStatus, showAddress }) {
         />
         Refresh balance
       </button>
-      {showAddress && (
-        <>
-          <button
-            className="btn btn-outline-secondary mt-1"
-            onClick={() => {
-              claimTestTokens(stxAddress);
-            }}
-          >
-            <div
-              ref={faucetSpinner}
-              role="status"
-              className="d-none spinner-border spinner-border-sm text-info align-text-top mr-2"
-            />
-            Claim test tokens from faucet
-          </button>
-          <br />
-          <TxStatus txId={txId} resultPrefix="Tokens transferred? " />
-        </>
-      )}
     </>
   );
 }

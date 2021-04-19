@@ -153,6 +153,8 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
         Choose an amount, how much you would like to "delegately" stack through this pool.
         <input
           type="number"
+          step="any"
+          min="0"
           ref={amount}
           className="form-control"
           placeholder="Amount in STX"
@@ -178,7 +180,7 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
           }}
         />
         <br />
-        Locking Period (How long do you want to swim this time)
+        Locking Period (how long do you want to swim this time?)
         <input
           type="text"
           ref={lockingPeriod}
@@ -199,7 +201,7 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
           }}
         />
         <br />
-        Payout address (How you would like to get your rewards)
+        Payout address (how would you like to get your rewards)
         <input
           type="text"
           ref={payoutAddress}

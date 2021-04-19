@@ -24,7 +24,6 @@ export function PoolList({ ownerStxAddress }) {
 
   return (
     <div>
-      <h5>All Public Pools</h5>
       <div
         ref={spinner}
         role="status"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { PoolRegister } from '../components/PoolRegister';
+import { PoolForm } from '../components/PoolForm';
 import { useStxAddresses } from '../lib/hooks';
 
 export default function MyProfileRegister({ userSession }) {
@@ -10,7 +10,7 @@ export default function MyProfileRegister({ userSession }) {
     <main className="panel-welcome mt-5 container">
       <div className="row">
         <div className="mx-auto col-sm-10 col-md-8 px-4">
-          <PoolRegister ownerStxAddress={ownerStxAddress} />
+          <PoolForm register ownerStxAddress={ownerStxAddress} />
         </div>
       </div>
     </main>
