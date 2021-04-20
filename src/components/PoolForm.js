@@ -188,8 +188,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
     const contractCV = contractPrincipalCV(poolCtrAddress, poolCtrName);
     const statusCV = uintCV(poolStatus.current.value);
     if (!(await checkContract(poolCtrAddress, poolCtrName, useExt))) {
-      setStatus('Contract does not satisfy trait');
-      return
+      setStatus('Contract does not satisfy trait. Please verify manually.');
     }
     console.log({ functionName, lockingPeriodCV: lockingPeriodsCV, poxAddressCV: poxAddressesCV });
     try {
