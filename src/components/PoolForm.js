@@ -561,7 +561,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
             className="form-control"
             defaultValue={register ? '' : pool.data['date-of-payout'].data}
             placeholder="e.g. end of cycle, instant"
-            maxlength="80"
+            maxLength="80"
             onKeyUp={e => {
               if (e.key === 'Enter') fees.current.focus();
             }}
@@ -579,7 +579,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
             className="form-control"
             defaultValue={register ? '' : pool.data['fees'].data}
             placeholder="e.g. 10%, 5 STX"
-            maxlength="80"
+            maxLength="80"
             onKeyUp={e => {
               if (e.key === 'Enter') poolStatus.current.focus();
             }}
