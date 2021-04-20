@@ -8,7 +8,13 @@ import {
   tupleCV,
   uintCV,
 } from '@stacks/transactions';
-import { CONTRACT_ADDRESS, NETWORK, POOL_REGISTRY_CONTRACT_NAME } from './constants';
+import {
+  CONTRACT_ADDRESS,
+  GENESIS_CONTRACT_ADDRESS,
+  NETWORK,
+  POOL_REGISTRY_CONTRACT_NAME,
+  STACK_API_URL,
+} from './constants';
 
 const contractAddress = CONTRACT_ADDRESS;
 const contractName = POOL_REGISTRY_CONTRACT_NAME;
@@ -109,5 +115,32 @@ export async function verifyUrl(url, username) {
       console.log(e);
       return false;
     }
+  }
+}
+
+const whiteListedContracts = {};
+whiteListedContracts[
+  `${GENESIS_CONTRACT_ADDRESS}/pox/${CONTRACT_ADDRESS}/${POOL_REGISTRY_CONTRACT_NAME}/pool-trait`
+] = true;
+
+export async function verifyContract(ctrAddress, ctrName, useExt) {
+  const path = `${ctrAddress}/${ctrName}/${CONTRACT_ADDRESS}/${POOL_REGISTRY_CONTRACT_NAME}/${
+    useExt ? 'pool-trait-ext' : 'pool-trait'
+  }`;
+
+  console.log({ path });
+  if (path in whiteListedContracts) {
+    return whiteListedContracts[path];
+  } else {
+    let isImplemented;
+    const result = await fetch(`${STACK_API_URL}/v2/traits/${path}`);
+    console.log({ result });
+    if (result.code === 404) {
+      isImplemented = false;
+    } else {
+      isImplemented = (await result.json()).isImplemented;
+    }
+    whiteListedContracts.path = isImplemented;
+    return isImplemented;
   }
 }

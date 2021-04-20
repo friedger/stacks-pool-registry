@@ -5,6 +5,7 @@ import {
   GENESIS_CONTRACT_ADDRESS,
   NETWORK,
   POOL_REGISTRY_CONTRACT_NAME,
+  STACK_API_URL,
 } from '../lib/constants';
 import { TxStatus } from '../lib/transactions';
 import { fetchAccount, getUsername } from '../lib/account';
@@ -27,7 +28,7 @@ import {
   uintCV,
 } from '@stacks/transactions';
 import * as c32 from 'c32check';
-import { fetchPool, nameToUsernameCV, verifyUrl } from '../lib/pools';
+import { fetchPool, nameToUsernameCV, verifyContract, verifyUrl } from '../lib/pools';
 import { poxAddrCVFromBitcoin, poxCVToBtcAddress } from '../lib/pools-utils';
 import BN from 'bn.js';
 
@@ -133,7 +134,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
         if (!price) {
           await checkPrice();
         }
-        priceBN = new BN(price);
+        priceBN = new BN(price  * 1000000);
       }
     } else {
       functionName = useExt ? 'update-ext' : 'update';
@@ -188,6 +189,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
     const statusCV = uintCV(poolStatus.current.value);
     if (!(await checkContract(poolCtrAddress, poolCtrName, useExt))) {
       setStatus('Contract does not satisfy trait');
+      return
     }
     console.log({ functionName, lockingPeriodCV: lockingPeriodsCV, poxAddressCV: poxAddressesCV });
     try {
@@ -251,12 +253,12 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
     }
   };
 
-  const checkContract = (ctrAddress, ctrName, useExt) => {
-    return true;
+  const checkContract = async (ctrAddress, ctrName, useExt) => {
+    return verifyContract(ctrAddress, ctrName, useExt);
   };
 
   const checkUrl = async (url, username) => {
-   return verifyUrl(url, username)
+    return verifyUrl(url, username);
   };
 
   const validateForm = () => {
@@ -298,7 +300,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
           c32.b58ToC32(addr.trim());
           return result;
         } catch (e) {
-          console.log(addr, e)
+          console.log(addr, e);
           return false;
         }
       }, true)
