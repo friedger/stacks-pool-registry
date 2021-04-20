@@ -135,7 +135,7 @@ export async function verifyContract(ctrAddress, ctrName, useExt) {
     let isImplemented;
     const result = await fetch(`${STACK_API_URL}/v2/traits/${path}`);
     console.log({ result });
-    if (result.code === 404) {
+    if (result.status === 404) {
       isImplemented = false;
     } else {
       isImplemented = (await result.json()).isImplemented;

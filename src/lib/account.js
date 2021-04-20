@@ -96,12 +96,11 @@ export async function getUsername(addressAsString) {
     },
   });
   if (nameResult.okay && nameResult.result !== '0x09') {
-    const name = hexToCV(nameResult.result);
-    if (name.value.data.name.type === ClarityType.Buffer) {
-      return name.value;
+    const resultCV = hexToCV(nameResult.result);
+    if (resultCV === ClarityType.ResponseOk) {
+      return resultCV.value;
     } else {
-      console.log(name.value)
-      console.log('No name found. Error: ' + name.value.data.code.value.toString(10));
+      console.log('No name found. Error: ' + resultCV.value.data.code.value.toString(10));
       return undefined;
     }
   } else {
