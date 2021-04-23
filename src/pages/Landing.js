@@ -47,7 +47,7 @@ export default function Landing(props) {
               <div className="card-body">
                 <p className="card-text mb-3">
                   Pool Registry is a web interface to the pool registry smart contract{' '}
-                  <a href="https://explorer.stacks.co/txid/0x89cff4241836c31c6a47bc268225b379f076a04709a27ec4665b7747d191d9c2?chain=mainnet">
+                  <a href={`https://explorer.stacks.co/txid/${CONTRACT_ADDRESS}.${POOL_REGISTRY_CONTRACT_NAME}?chain=mainnet`}>
                     {CONTRACT_ADDRESS}.{POOL_REGISTRY_CONTRACT_NAME}
                   </a>
                   .

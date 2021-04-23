@@ -28,7 +28,7 @@ export default function App(props) {
   return (
     <Connect authOptions={authOptions}>
       <nav className="navbar sticky-top navbar-dark bg-dark text-light">
-        <a className="navbar-brand" href="https://stacking.club">
+        <a className="navbar-brand" href="/">
           <img src="/mainnet.png" alt="Logo" />
         </a>
         <Auth className="ml-auto" userSession={userSession} />

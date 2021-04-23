@@ -1,4 +1,5 @@
 import React from 'react';
+import { CONTRACT_ADDRESS, POOL_REGISTRY_CONTRACT_NAME } from '../lib/constants';
 
 export default function Overview(props) {
   return (
@@ -18,9 +19,18 @@ export default function Overview(props) {
               <a href="https://stacks101.com">stacks101.com</a>
             </li>
             <li>
-              <a href="stacking.club/learn">stacking.club/learn</a>
+              <a href="https://stacking.club/learn">stacking.club/learn</a>
             </li>
           </ul>
+        </div>
+        <div className="col-xs-10 col-md-8 mx-auto mb-3 px-4">
+          Pool Registry is a web interface to the pool registry smart contract{' '}
+          <a
+            href={`https://explorer.stacks.co/txid/${CONTRACT_ADDRESS}.${POOL_REGISTRY_CONTRACT_NAME}?chain=mainnet`}
+          >
+            {CONTRACT_ADDRESS}.{POOL_REGISTRY_CONTRACT_NAME}
+          </a>
+          .
         </div>
       </div>
     </main>
