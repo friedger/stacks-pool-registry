@@ -162,7 +162,7 @@ async function verifyContractTrait(ctrAddress, ctrName, traitName) {
     if (result.status === 404) {
       isImplemented = false;
     } else {
-      isImplemented = (await result.json()).isImplemented;
+      isImplemented = (await result.json()).is_implemented;
     }
     whiteListedContracts.path = isImplemented;
     return isImplemented;
