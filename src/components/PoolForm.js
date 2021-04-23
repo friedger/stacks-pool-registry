@@ -68,7 +68,6 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
   const payout = useRef();
   const dateOfPayout = useRef();
   const fees = useRef();
-  const extendedCheckbox = useRef();
   const poolStatus = useRef();
 
   const spinner = useRef();
@@ -459,37 +458,12 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
             }
             placeholder="Pool's Contract ID"
             onKeyUp={e => {
-              if (e.key === 'Enter') extendedCheckbox.current.focus();
-            }}
-            onBlur={e => {
-              validateForm();
-            }}
-          />
-          <br />
-          <input
-            name="extendedContract"
-            type="checkbox"
-            ref={extendedCheckbox}
-            className="checkbox"
-            defaultChecked={
-              register ? false : pool.data['extended-contract'].type === ClarityType.OptionalSome
-            }
-            placeholder="Use extended trait"
-            onKeyUp={e => {
               if (e.key === 'Enter') minimum.current.focus();
             }}
             onBlur={e => {
               validateForm();
             }}
           />
-          <label htmlFor="extendedContract">
-            <b>Extended Contract</b>
-          </label>
-          <br />
-          Check this box if the pool uses a pool contract with the extended trait. The extended
-          trait has a `delegte-stx` function that allows users to specify the user's reward address
-          and the locking period.
-          <br />
           <br />
           <b>Minimum STX</b> required to join
           <input
