@@ -1,12 +1,9 @@
 import { ClarityType, cvToString } from '@stacks/transactions';
-import { usernameCVToName } from '../lib/pools';
+import { getPoolContractId, usernameCVToName } from '../lib/pools';
 import { poxCVToBtcAddress } from '../lib/pools-utils';
 
 export default function PoolInfo({ pool }) {
-  const useExt = pool.data.contract.type === ClarityType.OptionalNone;
-  const contractId = useExt
-    ? cvToString(pool.data['extended-contract'].value)
-    : cvToString(pool.data.contract.value);
+  const contractId = getPoolContractId(pool);
 
   return (
     <>

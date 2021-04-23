@@ -97,9 +97,10 @@ export async function getUsername(addressAsString) {
   });
   if (nameResult.okay && nameResult.result !== '0x09') {
     const resultCV = hexToCV(nameResult.result);
-    if (resultCV === ClarityType.ResponseOk) {
+    if (resultCV.type === ClarityType.ResponseOk) {
       return resultCV.value;
     } else {
+      console.log({ nameResult });
       console.log('No name found. Error: ' + resultCV.value.data.code.value.toString(10));
       return undefined;
     }

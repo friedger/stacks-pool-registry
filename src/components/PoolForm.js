@@ -24,11 +24,17 @@ import {
   someCV,
   standardPrincipalCV,
   stringAsciiCV,
-  tupleCV,
   uintCV,
 } from '@stacks/transactions';
 import * as c32 from 'c32check';
-import { fetchPool, nameToUsernameCV, verifyContract, verifyUrl } from '../lib/pools';
+import {
+  fetchPool,
+  findTraitIndex,
+  nameToUsernameCV,
+  registerFunctions,
+  updateFunctions,
+  verifyUrl,
+} from '../lib/pools';
 import { poxAddrCVFromBitcoin, poxCVToBtcAddress } from '../lib/pools-utils';
 import BN from 'bn.js';
 
@@ -106,7 +112,6 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
   }, [ownerStxAddress, poolId]);
 
   const formAction = async () => {
-    const useExt = extendedCheckbox.current.checked;
     let functionName;
     let stxPostCondition;
     let priceBN;
@@ -126,18 +131,24 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
       setStatus(undefined);
     }
 
+    const [poolCtrAddress, poolCtrName] = contract.current.value.trim().split('.');
+    const traitIndex = await findTraitIndex(poolCtrAddress, poolCtrName);
+    if (traitIndex < 0) {
+      setStatus('Invalid pool contract');
+      return;
+    }
     if (register) {
-      functionName = useExt ? 'register-ext' : 'register';
+      functionName = registerFunctions[traitIndex];
       if (username) {
         priceBN = new BN(0);
       } else {
         if (!price) {
           await checkPrice();
         }
-        priceBN = new BN(price  * 1000000);
+        priceBN = new BN(price * 1000000);
       }
     } else {
-      functionName = useExt ? 'update-ext' : 'update';
+      functionName = updateFunctions[traitIndex];
       priceBN = new BN(0);
     }
 
@@ -184,12 +195,8 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
     const payoutCV = stringAsciiCV(payout.current.value.trim());
     const dateOfPayoutCV = stringAsciiCV(dateOfPayout.current.value.trim());
     const feesCV = stringAsciiCV(fees.current.value.trim());
-    const [poolCtrAddress, poolCtrName] = contract.current.value.trim().split('.');
     const contractCV = contractPrincipalCV(poolCtrAddress, poolCtrName);
     const statusCV = uintCV(poolStatus.current.value);
-    if (!(await checkContract(poolCtrAddress, poolCtrName, useExt))) {
-      setStatus('Contract does not satisfy trait. Please verify manually.');
-    }
     console.log({ functionName, lockingPeriodCV: lockingPeriodsCV, poxAddressCV: poxAddressesCV });
     try {
       setStatus(`Sending transaction`);
@@ -250,10 +257,6 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
     } else {
       priceInfo.current.innerHTML = ERR_NAME;
     }
-  };
-
-  const checkContract = async (ctrAddress, ctrName, useExt) => {
-    return verifyContract(ctrAddress, ctrName, useExt);
   };
 
   const checkUrl = async (url, username) => {

@@ -19,6 +19,7 @@ import {
 import * as c32 from 'c32check';
 import { poxAddrCV, poxAddrCVFromBitcoin } from '../lib/pools-utils';
 import PoolInfo from './PoolInfo';
+import { getPoolContractId } from '../lib/pools';
 
 function getPayout(pool) {
   switch (pool.data.payout.data) {
@@ -92,10 +93,8 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
     }
   }, [ownerStxAddress]);
 
-  const useExt = pool.data.contract.type === ClarityType.OptionalNone;
-  const contractId = useExt
-    ? cvToString(pool.data['extended-contract'].value)
-    : cvToString(pool.data.contract.value);
+  const isSimple = pool.data.contract.type === ClarityType.OptionalSome;
+  const contractId = getPoolContractId(pool);
   const [contractAddress, contractName] = contractId.split('.');
   const delegatee = cvToString(pool.data.delegatee);
   const parts = delegatee.split('.');
@@ -118,9 +117,9 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
     const lockingPeriodCV = uintCV(lockingPeriod.current.value.trim);
     try {
       setStatus(`Sending transaction`);
-      const functionArgs = useExt
-        ? [amountCV, delegateeCV, durationCV, rewardBtcAddressCV, payoutAddressCV, lockingPeriodCV]
-        : [amountCV, delegateeCV, durationCV, rewardBtcAddressCV];
+      const functionArgs = isSimple
+        ? [amountCV, delegateeCV, durationCV, rewardBtcAddressCV]
+        : [amountCV, delegateeCV, durationCV, rewardBtcAddressCV, payoutAddressCV, lockingPeriodCV];
       console.log({ functionArgs });
       await doContractCall({
         contractAddress,
@@ -187,7 +186,7 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
           ref={lockingPeriod}
           className="form-control"
           placeholder="Number of cycles"
-          disabled={!useExt}
+          disabled={isSimple}
           readOnly={pool && pool.data['locking-period'].type === ClarityType.List}
           defaultValue={
             pool && pool.data['locking-period'].type === ClarityType.List
@@ -208,7 +207,7 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
           ref={payoutAddress}
           className="form-control"
           defaultValue={userPayoutAddress}
-          disabled={!useExt}
+          disabled={isSimple}
           onKeyUp={e => {
             if (e.key === 'Enter') joinAction();
           }}

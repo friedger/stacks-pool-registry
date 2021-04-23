@@ -2,6 +2,7 @@ import {
   bufferCVFromString,
   callReadOnlyFunction,
   ClarityType,
+  cvToString,
   falseCV,
   listCV,
   trueCV,
@@ -123,10 +124,33 @@ whiteListedContracts[
   `${GENESIS_CONTRACT_ADDRESS}/pox/${CONTRACT_ADDRESS}/${POOL_REGISTRY_CONTRACT_NAME}/pool-trait`
 ] = true;
 
-export async function verifyContract(ctrAddress, ctrName, useExt) {
-  const path = `${ctrAddress}/${ctrName}/${CONTRACT_ADDRESS}/${POOL_REGISTRY_CONTRACT_NAME}/${
-    useExt ? 'pool-trait-ext' : 'pool-trait'
-  }`;
+export async function findTraitIndex(ctrAddress, ctrName) {
+  if (await verifyContractTrait(ctrAddress, ctrName, 'pool-trait')) {
+    return 0;
+  } else if (await verifyContractTrait(ctrAddress, ctrName, 'pool-trait-ext')) {
+    return 1;
+  } else if (await verifyContractTrait(ctrAddress, ctrName, 'pool-trait-ext2')) {
+    return 2;
+  } else {
+    return -1;
+  }
+}
+
+export const registerFunctions = ['register', 'register-ext', 'register-ext2'];
+export const updateFunctions = ['update', 'update-ext', 'update-ext2'];
+
+export function getPoolContractId(pool) {
+  const contractCV =
+    pool.data.contract.type === ClarityType.OptionalSome
+      ? pool.data.contract.value
+      : pool.data.contract.ext.type === ClarityType.OptionalSome
+      ? pool.data['extended-contract']
+      : pool.data['extended2-contract'];
+  return cvToString(contractCV);
+}
+
+async function verifyContractTrait(ctrAddress, ctrName, traitName) {
+  const path = `${ctrAddress}/${ctrName}/${CONTRACT_ADDRESS}/${POOL_REGISTRY_CONTRACT_NAME}/${traitName}`;
 
   console.log({ path });
   if (path in whiteListedContracts) {

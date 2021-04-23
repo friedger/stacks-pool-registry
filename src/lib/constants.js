@@ -8,7 +8,7 @@ import {
 import { StacksMainnet } from '@stacks/network';
 
 export const CONTRACT_ADDRESS = 'SP1K1A1PMGW2ZJCNF46NWZWHG8TS1D23EGH1KNK60';
-export const POOL_REGISTRY_CONTRACT_NAME = 'pool-registry';
+export const POOL_REGISTRY_CONTRACT_NAME = 'pool-registry-v1';
 export const GENESIS_CONTRACT_ADDRESS = 'SP000000000000000000002Q6VF78';
 export const BNS_CONTRACT_NAME = 'bns';
 
