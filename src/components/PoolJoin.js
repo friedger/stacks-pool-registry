@@ -94,6 +94,8 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
   }, [ownerStxAddress]);
 
   const isSimple = pool.data.contract.type === ClarityType.OptionalSome;
+  const isExt = pool.data["extended-contract"].type === ClarityType.OptionalSome;
+  const isExt2 = pool.data["extended2-contract"].type === ClarityType.OptionalSome;
   const contractId = getPoolContractId(pool);
   const [contractAddress, contractName] = contractId.split('.');
   const delegatee = cvToString(pool.data.delegatee);
