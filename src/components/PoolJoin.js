@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 
-import { accountsApi, authOrigin, NETWORK } from '../lib/constants';
+import { accountsApi, NETWORK } from '../lib/constants';
 import { TxStatus } from '../lib/transactions';
 import { fetchAccount } from '../lib/account';
 import { useConnect as useStacksJsConnect } from '@stacks/connect-react';

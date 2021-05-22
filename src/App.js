@@ -12,6 +12,7 @@ import PoolDetails from './pages/PoolDetails';
 import MyProfile from './pages/MyProfile';
 import MyProfileRegister from './pages/MyProfileRegister';
 import MyProfileEdit from './pages/MyProfileEdit';
+import PoolDetailsSimple from './pages/PoolDetailsSimple';
 
 export default function App(props) {
   const { authOptions } = useConnect();
@@ -102,6 +103,11 @@ function Content({ userSession }) {
               />
               <MyProfileEdit
                 path="/me/edit/:poolId"
+                decentralizedID={decentralizedID}
+                userSession={userSession}
+              />
+              <PoolDetailsSimple
+                path="/join/:delegatee"
                 decentralizedID={decentralizedID}
                 userSession={userSession}
               />
