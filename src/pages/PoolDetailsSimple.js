@@ -9,7 +9,7 @@ export default function PoolDetailsSimple({ delegatee, location, userSession }) 
     <main className="panel-welcome mt-5 container">
       <div className="lead row mt-5">
         <div className="col-xs-10 col-md-8 mx-auto px-4">
-          <h1 className="card-title">Pool</h1>
+          <h1 className="card-title">Join Pool</h1>
         </div>
 
         <div className="col-xs-10 col-md-8 mx-auto mb-4 px-4">
