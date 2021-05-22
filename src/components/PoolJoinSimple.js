@@ -6,7 +6,11 @@ import { fetchAccount } from '../lib/account';
 import { useConnect as useStacksJsConnect } from '@stacks/connect-react';
 import {
   bufferCV,
+  ClarityType,
   contractPrincipalCV,
+  cvToHex,
+  cvToString,
+  hexToCV,
   noneCV,
   PostConditionMode,
   someCV,
@@ -58,6 +62,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
   const [status, setStatus] = useState();
   const [txId, setTxId] = useState();
   const [stackingStatus, setStackingStatus] = useState();
+  const [delegationState, setDelegationState] = useState();
   const [suggestedAmount, setSuggestedAmount] = useState();
   const [loading, setLoading] = useState(false);
 
@@ -76,7 +81,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
           console.log({ acc });
         });
       accountsApi.getAccountBalance({ principal: ownerStxAddress }).then(balance => {
-        console.log(balance)
+        console.log(balance);
         const stxBalance = (parseInt(balance.stx.balance) - parseInt(balance.stx.locked)) / 1000000;
         setSuggestedAmount(Math.min(stxBalance, 100));
       });
@@ -84,7 +89,25 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
       const client = new StackingClient(ownerStxAddress, NETWORK);
       client.getStatus().then(s => {
         setStackingStatus(s);
-        setLoading(false);
+        smartContractsApi
+          .getContractDataMapEntry({
+            contractAddress: 'SP000000000000000000002Q6VF78',
+            contractName: 'pox',
+            mapName: 'delegation-state',
+            key: cvToHex(tupleCV({ stacker: standardPrincipalCV(ownerStxAddress) })),
+            network: NETWORK,
+          })
+          .then(result => {
+            console.log(result);
+            const mapEntry = hexToCV(result.data);
+
+            if (mapEntry.type === ClarityType.OptionalNone) {
+              setDelegationState({ state: undefined });
+            } else {
+              setDelegationState({ state: mapEntry.value });
+            }
+            setLoading(false);
+          });
       });
     }
   }, [ownerStxAddress, setSuggestedAmount]);
@@ -138,6 +161,17 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
   return (
     <div>
       <section>
+        {delegationState &&
+          (delegationState.state ? (
+            <>
+              You have joined the pool {cvToString(delegationState.state.data['delegated-to'])} with{' '}
+              <Amount ustx={delegationState.state.data['amount-ustx'].value} />.
+            </>
+          ) : (
+            <>You are not delegating to any pool.</>
+          ))}
+      </section>
+      <section>
         {stackingStatus &&
           (stackingStatus.stacked ? (
             <>
@@ -145,7 +179,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
               {stackingStatus.details.first_reward_cycle + stackingStatus.details.lock_period}.
             </>
           ) : (
-            <>You are currently not stacking.</>
+            <>Your Stacks tokens are not locked.</>
           ))}
         {!stackingStatus && loading && (
           <div
@@ -154,7 +188,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
           />
         )}
       </section>
-      {stackingStatus && !stackingStatus.stacked && (
+      {stackingStatus && !stackingStatus.stacked && delegationState && !delegationState.state && (
         <>
           <h5>Join the pool</h5>
           Pool address: <strong>{delegatee}</strong>

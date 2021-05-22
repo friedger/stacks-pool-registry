@@ -26,6 +26,10 @@ export default function PoolDetailsSimple({ delegatee, location, userSession }) 
           </div>
           <ul className="list-group list-group-flush">
             <li className="list-group-item">
+              If you have not yet locked any Stacks tokens and if you haven't joined a pool yet,
+              join now.
+            </li>
+            <li className="list-group-item">
               Enter the amount, duration, and reward address to define how you would like to stack
               and click delegate.
             </li>
