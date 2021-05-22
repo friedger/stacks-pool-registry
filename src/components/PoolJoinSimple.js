@@ -225,37 +225,41 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
               }}
             />
             <br />
-            Locking Period (how long do you want to swim this time?)
-            <input
-              type="text"
-              ref={lockingPeriod}
-              className="form-control"
-              placeholder="Number of cycles"
-              disabled={isSimple}
-              defaultValue={2}
-              onKeyUp={e => {
-                if (e.key === 'Enter') payoutAddress.current.focus();
-              }}
-              onBlur={e => {
-                setStatus(undefined);
-              }}
-            />
-            <br />
-            Payout address (how would you like to get your rewards)
-            <input
-              type="text"
-              ref={payoutAddress}
-              className="form-control"
-              defaultValue={userPayoutAddress}
-              disabled={isSimple}
-              onKeyUp={e => {
-                if (e.key === 'Enter') joinAction();
-              }}
-              onBlur={e => {
-                setStatus(undefined);
-              }}
-            />
-            <br />
+            {delegatee === 'SPSTX06BNGJ2CP1F6WA8V49B6MYD784N6YZMK95G' && (
+              <>
+                Locking Period (how long do you want to swim this time?)
+                <input
+                  type="text"
+                  ref={lockingPeriod}
+                  className="form-control"
+                  placeholder="Number of cycles"
+                  disabled={isSimple}
+                  defaultValue={2}
+                  onKeyUp={e => {
+                    if (e.key === 'Enter') payoutAddress.current.focus();
+                  }}
+                  onBlur={e => {
+                    setStatus(undefined);
+                  }}
+                />
+                <br />
+                Payout address (how would you like to get your rewards)
+                <input
+                  type="text"
+                  ref={payoutAddress}
+                  className="form-control"
+                  defaultValue={userPayoutAddress}
+                  disabled={isSimple}
+                  onKeyUp={e => {
+                    if (e.key === 'Enter') joinAction();
+                  }}
+                  onBlur={e => {
+                    setStatus(undefined);
+                  }}
+                />
+                <br />
+              </>
+            )}
             <div className="input-group-append">
               <button className="btn btn-outline-secondary" type="button" onClick={joinAction}>
                 <div
