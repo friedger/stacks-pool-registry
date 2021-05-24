@@ -143,7 +143,7 @@ export function getPoolContractId(pool) {
   const contractCV =
     pool.data.contract.type === ClarityType.OptionalSome
       ? pool.data.contract.value
-      : pool.data.contract.ext.type === ClarityType.OptionalSome
+      : pool.data.contract.ext && pool.data.contract.ext.type === ClarityType.OptionalSome
       ? pool.data['extended-contract']
       : pool.data['extended2-contract'];
   return cvToString(contractCV);

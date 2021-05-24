@@ -2,6 +2,13 @@ import { ClarityType, cvToString } from '@stacks/transactions';
 import { getPoolContractId, usernameCVToName } from '../lib/pools';
 import { poxCVToBtcAddress } from '../lib/pools-utils';
 
+function normalizedUrl(u) {
+  if (u.startsWith('https://') || u.startsWith('http://')) {
+    return u;
+  } else {
+    return `https://${u}`;
+  }
+}
 export default function PoolInfo({ pool }) {
   const contractId = getPoolContractId(pool);
 
@@ -9,7 +16,7 @@ export default function PoolInfo({ pool }) {
     <>
       <h5>
         {pool.data.url.data ? (
-          <a href={pool.data.url.data}>{usernameCVToName(pool.data.name)}</a>
+          <a href={normalizedUrl(pool.data.url.data)}>{usernameCVToName(pool.data.name)}</a>
         ) : (
           <>{usernameCVToName(pool.data.name)}</>
         )}
