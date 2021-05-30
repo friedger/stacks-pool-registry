@@ -158,6 +158,35 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
     }
   };
 
+  const revokeAction = async () => {
+    setLoading(true);
+    try {
+      setStatus(`Sending transaction`);
+      const functionArgs = [];
+      console.log({ functionArgs });
+      await doContractCall({
+        contractAddress,
+        contractName,
+        functionName: 'revoke-delegate-stx',
+        functionArgs,
+        postConditionMode: PostConditionMode.Deny,
+        postConditions: [],
+        userSession,
+        network: NETWORK,
+        onFinish: data => {
+          console.log(data);
+          setStatus(undefined);
+          setTxId(data.txId);
+          setLoading(false);
+        },
+      });
+    } catch (e) {
+      console.log(e);
+      setStatus(e.toString());
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       <section>
@@ -166,6 +195,16 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
             <>
               You have joined the pool {cvToString(delegationState.state.data['delegated-to'])} with{' '}
               <Amount ustx={delegationState.state.data['amount-ustx'].value} />.
+              <br />
+              <button className="btn btn-outline-secondary" type="button" onClick={revokeAction}>
+                <div
+                  role="status"
+                  className={`${
+                    loading ? '' : 'd-none'
+                  } spinner-border spinner-border-sm text-info align-text-top mr-2`}
+                />
+                Cancel pool membership
+              </button>
             </>
           ) : (
             <>You are not delegating to any pool.</>
