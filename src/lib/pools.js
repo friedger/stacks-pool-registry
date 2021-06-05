@@ -98,6 +98,7 @@ export function usernameCVToName(usernameCV) {
 const whiteListedUrls = {
   'https://pool.friedger.de': 'friedgerpool.id',
   'https://planbetter.org': 'planbetter.btc',
+  'www.secretlabs.com': 'xversepool.id',
 };
 
 export async function verifyUrl(url, username) {
