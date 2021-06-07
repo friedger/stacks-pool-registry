@@ -169,7 +169,7 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
           }}
         />
         <br />
-        Duration of your pool membership
+        Duration of your pool membership (until which BTC block)
         <input
           type="text"
           ref={duration}

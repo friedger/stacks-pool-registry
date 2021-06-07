@@ -250,7 +250,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
               }}
             />
             <br />
-            Duration of your pool membership
+            Duration of your pool membership (until BTC block)
             <input
               type="text"
               ref={duration}
