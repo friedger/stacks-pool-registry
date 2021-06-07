@@ -58,57 +58,62 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
   const payoutAddress = useRef();
   const lockingPeriod = useRef();
 
-  const spinner = useRef();
   const [status, setStatus] = useState();
   const [txId, setTxId] = useState();
   const [stackingStatus, setStackingStatus] = useState();
   const [delegationState, setDelegationState] = useState();
   const [suggestedAmount, setSuggestedAmount] = useState();
   const [loading, setLoading] = useState(false);
+  const [progress1, setProgress1] = useState(5);
+  const [progress2, setProgress2] = useState(0);
+  const [progress3, setProgress3] = useState(0);
+  const [progress4, setProgress4] = useState(0);
 
   const contractId = 'SP000000000000000000002Q6VF78.pox';
 
   useEffect(() => {
     if (ownerStxAddress) {
-      setLoading(true);
       fetchAccount(ownerStxAddress)
         .catch(e => {
           setStatus('Failed to access your account', e);
           console.log(e);
+          setProgress1(25);
         })
         .then(async acc => {
           setStatus(undefined);
           console.log({ acc });
+          setProgress1(25);
         });
       accountsApi.getAccountBalance({ principal: ownerStxAddress }).then(balance => {
         console.log(balance);
         const stxBalance = (parseInt(balance.stx.balance) - parseInt(balance.stx.locked)) / 1000000;
         setSuggestedAmount(Math.min(stxBalance, 100));
+        setProgress2(25);
       });
 
       const client = new StackingClient(ownerStxAddress, NETWORK);
       client.getStatus().then(s => {
         setStackingStatus(s);
-        smartContractsApi
-          .getContractDataMapEntry({
-            contractAddress: 'SP000000000000000000002Q6VF78',
-            contractName: 'pox',
-            mapName: 'delegation-state',
-            key: cvToHex(tupleCV({ stacker: standardPrincipalCV(ownerStxAddress) })),
-            network: NETWORK,
-          })
-          .then(result => {
-            console.log(result);
-            const mapEntry = hexToCV(result.data);
-
-            if (mapEntry.type === ClarityType.OptionalNone) {
-              setDelegationState({ state: undefined });
-            } else {
-              setDelegationState({ state: mapEntry.value });
-            }
-            setLoading(false);
-          });
+        setProgress3(25);
       });
+      smartContractsApi
+        .getContractDataMapEntry({
+          contractAddress: 'SP000000000000000000002Q6VF78',
+          contractName: 'pox',
+          mapName: 'delegation-state',
+          key: cvToHex(tupleCV({ stacker: standardPrincipalCV(ownerStxAddress) })),
+          network: NETWORK,
+        })
+        .then(result => {
+          const mapEntry = hexToCV(result.data);
+
+          if (mapEntry.type === ClarityType.OptionalNone) {
+            setDelegationState({ state: undefined });
+          } else {
+            setDelegationState({ state: mapEntry.value });
+          }
+          setProgress4(25);
+        });
     }
   }, [ownerStxAddress, setSuggestedAmount]);
 
@@ -186,9 +191,21 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
       setLoading(false);
     }
   };
-
+  const progress = progress1 + progress2 + progress3 + progress4;
   return (
     <div>
+      {progress < 100 && (
+        <div class="progress">
+          <div
+            class="progress-bar"
+            role="progressbar"
+            style={{ width: `${progress}%` }}
+            aria-valuenow={progress}
+            aria-valuemin="0"
+            aria-valuemax="100"
+          />
+        </div>
+      )}
       <section>
         {delegationState &&
           (delegationState.state ? (
@@ -220,7 +237,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
           ) : (
             <>Your Stacks tokens are not locked.</>
           ))}
-        {!stackingStatus && loading && (
+        {progress < 100 && (
           <div
             role="status"
             className="spinner-border spinner-border-sm text-info align-text-top mr-2"
@@ -302,7 +319,6 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
             <div className="input-group-append">
               <button className="btn btn-outline-secondary" type="button" onClick={joinAction}>
                 <div
-                  ref={spinner}
                   role="status"
                   className={`${
                     loading ? '' : 'd-none'
