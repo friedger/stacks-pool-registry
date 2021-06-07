@@ -49,7 +49,7 @@ export function PoolList({ payout, lockingPeriod, search, verifyUsername }) {
     <div>
       {filteredPools &&
         filteredPools.map((pool, key) => {
-          return <Pool key={key} pool={pool} poolId={key + 1} />;
+          return <Pool key={key} pool={pool} poolId={pool.data['pool-id'].value.toNumber()} />;
         })}
       {!status && (!filteredPools || filteredPools.length === 0) && <>No pools found.</>}
       {status && (
