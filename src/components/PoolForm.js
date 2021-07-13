@@ -282,10 +282,11 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
 
     // delegatee address
     try {
-      console.log(delegateeAddress.current.value.trim());
-      c32.c32addressDecode(delegateeAddress.current.value.trim());
+      const [addr, name] = delegateeAddress.current.value.trim().split('.');
+      c32.c32addressDecode(addr);
       delegateeAddress.current.setCustomValidity('');
     } catch (e) {
+      console.log(e)
       delegateeAddress.current.setCustomValidity(ERR_INVALID_STX_ADDRESS + ' ' + e.toString());
       errors.push(ERR_INVALID_STX_ADDRESS);
     }
