@@ -5,7 +5,6 @@ import {
   GENESIS_CONTRACT_ADDRESS,
   NETWORK,
   POOL_REGISTRY_CONTRACT_NAME,
-  STACK_API_URL,
 } from '../lib/constants';
 import { TxStatus } from '../lib/transactions';
 import { fetchAccount, getUsername } from '../lib/account';
@@ -282,7 +281,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
 
     // delegatee address
     try {
-      const [addr, name] = delegateeAddress.current.value.trim().split('.');
+      const [addr] = delegateeAddress.current.value.trim().split('.');
       c32.c32addressDecode(addr);
       delegateeAddress.current.setCustomValidity('');
     } catch (e) {

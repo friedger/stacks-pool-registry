@@ -22,6 +22,7 @@ import * as c32 from 'c32check';
 import { poxAddrCV, poxAddrCVFromBitcoin } from '../lib/pools-utils';
 import { StackingClient } from '@stacks/stacking';
 import { Amount } from './Amount';
+import { PoXRevoke } from './PoXRevoke';
 
 function getPayoutAddress(payout, stxAddress) {
   console.log({ payout, stxAddress });
@@ -70,6 +71,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
   const [progress4, setProgress4] = useState(0);
 
   const contractId = 'SP000000000000000000002Q6VF78.pox';
+  const [contractAddress, contractName] = contractId.split('.');
 
   useEffect(() => {
     if (ownerStxAddress) {
@@ -118,7 +120,6 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
   }, [ownerStxAddress, setSuggestedAmount]);
 
   const isSimple = true;
-  const [contractAddress, contractName] = contractId.split('.');
   const parts = delegatee.split('.');
   const delegateeCV =
     parts.length < 2 ? standardPrincipalCV(parts[0]) : contractPrincipalCV(parts[0], parts[1]);
@@ -165,34 +166,6 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
     }
   };
 
-  const revokeAction = async () => {
-    setLoading(true);
-    try {
-      setStatus(`Sending transaction`);
-      const functionArgs = [];
-      console.log({ functionArgs });
-      await doContractCall({
-        contractAddress,
-        contractName,
-        functionName: 'revoke-delegate-stx',
-        functionArgs,
-        postConditionMode: PostConditionMode.Deny,
-        postConditions: [],
-        userSession,
-        network: NETWORK,
-        onFinish: data => {
-          console.log(data);
-          setStatus(undefined);
-          setTxId(data.txId);
-          setLoading(false);
-        },
-      });
-    } catch (e) {
-      console.log(e);
-      setStatus(e.toString());
-      setLoading(false);
-    }
-  };
   const progress = progress1 + progress2 + progress3 + progress4;
   return (
     <div>
@@ -215,15 +188,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
               You have joined the pool {cvToString(delegationState.state.data['delegated-to'])} with{' '}
               <Amount ustx={delegationState.state.data['amount-ustx'].value} />.
               <br />
-              <button className="btn btn-outline-secondary" type="button" onClick={revokeAction}>
-                <div
-                  role="status"
-                  className={`${
-                    loading ? '' : 'd-none'
-                  } spinner-border spinner-border-sm text-info align-text-top mr-2`}
-                />
-                Cancel pool membership
-              </button>
+              <PoXRevoke userSession={userSession} setStatus={setStatus} setTxId={setTxId}/>
             </>
           ) : (
             <>You are not delegating to any pool.</>

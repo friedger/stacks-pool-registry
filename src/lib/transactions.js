@@ -1,7 +1,7 @@
 import { serializeCV, hexToCV as stacksHexToCV } from '@stacks/transactions';
 import { connectWebSocketClient } from '@stacks/blockchain-api-client';
 import React, { useState, useEffect, useRef } from 'react';
-import { STACKS_API_WS_URL, STACK_API_URL, transactionsApi } from './constants';
+import { STACKS_API_WS_URL, transactionsApi } from './constants';
 
 export function resultToStatus(result) {
   if (result && !result.error && result.startsWith('"') && result.length === 66) {

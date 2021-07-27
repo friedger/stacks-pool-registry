@@ -6,6 +6,7 @@ import { fetchAccount, getUsername } from '../lib/account';
 import { useNavigate } from '@reach/router';
 import { fetchPools } from '../lib/pools';
 import PoolInfo from './PoolInfo';
+import { PoXRevoke } from './PoXRevoke';
 
 // Demonstrating BlockstackContext for legacy React Class Components.
 
@@ -132,6 +133,15 @@ export default function Profile({ stxAddresses, userSession }) {
         >
           Register New Pool
         </button>
+      </div>
+      <div className="pt-4">
+        If you want to revoke your membership of any pool, you can do it here.
+        <br/>
+        <PoXRevoke
+          userSession={userSession}
+          setStatus={setStatus}
+          setTxId={txId => setStatus(`Revoking with transcation ${txId}`)}
+        />
       </div>
       {status && (
         <>
