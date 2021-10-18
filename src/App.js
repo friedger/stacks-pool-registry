@@ -13,6 +13,7 @@ import MyProfile from './pages/MyProfile';
 import MyProfileRegister from './pages/MyProfileRegister';
 import MyProfileEdit from './pages/MyProfileEdit';
 import PoolDetailsSimple from './pages/PoolDetailsSimple';
+import MyProfileHodl from "./pages/MyProfileHodl"
 
 export default function App(props) {
   const { authOptions } = useConnect();
@@ -111,6 +112,9 @@ function Content({ userSession }) {
                 decentralizedID={decentralizedID}
                 userSession={userSession}
               />
+              <MyProfileHodl path="/hodl"
+              decentralizedID={decentralizedID}
+              userSession={userSession}/>
             </AppBody>
           </Router>
         </>

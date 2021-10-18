@@ -7,13 +7,15 @@ import { getStacksAccount } from './account';
 export function useStxAddresses(userSession) {
   const [ownerStxAddress, setOwnerStxAddress] = useState();
   const [appStxAddress, setAppStxAddress] = useState();
+  const [appPrivateKey, setAppPrivateKey] = useState();
   useEffect(() => {
     getUserData(userSession).then(userData => {
       const { address } = getStacksAccount(userData.appPrivateKey);
       setAppStxAddress(addressToString(address));
       setOwnerStxAddress(userData.profile.stxAddress.mainnet);
+      setAppPrivateKey(userData.appPrivateKey);
     });
   }, [userSession]);
 
-  return { ownerStxAddress, appStxAddress };
+  return { ownerStxAddress, appStxAddress, appPrivateKey };
 }

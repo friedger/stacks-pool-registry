@@ -18,8 +18,9 @@ export const STACK_API_URL = 'https://stacks-node-api.mainnet.stacks.co';
 export const STACKS_API_WS_URL = 'ws://stacks-node-api.mainnet.stacks.co/';
 export const STACKS_API_ACCOUNTS_URL = `${STACK_API_URL}/v2/accounts`;
 
-export const NETWORK = new StacksMainnet();
-NETWORK.coreApiUrl = STACK_API_URL;
+export const NETWORK = new StacksMainnet({
+  url:STACK_API_URL
+});
 
 const basePath = STACK_API_URL;
 const config = new Configuration({ basePath });
