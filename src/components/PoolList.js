@@ -31,8 +31,8 @@ export function PoolList({ payout, lockingPeriod, search, verifyUsername }) {
         (!lockingPeriod ||
           isNaN(lockingPeriod) ||
           pool.data['locking-period'].list.findIndex(item => {
-            console.log({ i: item.value.toNumber(), lp: lockingPeriod });
-            return item.value.toNumber() >= lockingPeriod;
+            console.log({ i: item.value, lp: lockingPeriod });
+            return item.value >= lockingPeriod;
           }) >= 0) &&
         (!search ||
           pool.data.fees.data.indexOf(search) >= 0 ||
@@ -49,7 +49,7 @@ export function PoolList({ payout, lockingPeriod, search, verifyUsername }) {
     <div>
       {filteredPools &&
         filteredPools.map((pool, key) => {
-          return <Pool key={key} pool={pool} poolId={pool.data['pool-id'].value.toNumber()} />;
+          return <Pool key={key} pool={pool} poolId={pool.data['pool-id'].value} />;
         })}
       {!status && (!filteredPools || filteredPools.length === 0) && <>No pools found.</>}
       {status && (

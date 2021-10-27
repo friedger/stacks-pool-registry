@@ -246,7 +246,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
       });
       console.log({ priceResult });
       if (priceResult.type === ClarityType.ResponseOk) {
-        const priceUstx = priceResult.value.value.toNumber() / 1000000;
+        const priceUstx = priceResult.value.value / 1000000n;
         setPrice(priceUstx);
         priceInfo.current.innerHTML = `Price: ${priceUstx.toFixed(6)} STX`;
       } else {
@@ -476,7 +476,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
               register
                 ? undefined
                 : pool.data['minimum-ustx'].type === ClarityType.OptionalSome
-                ? pool.data['minimum-ustx'].value.value.toNumber() / 1000000
+                ? pool.data['minimum-ustx'].value.value / 1000000n
                 : undefined
             }
             placeholder="Minimum STX required for joining"
@@ -573,7 +573,7 @@ export function PoolForm({ ownerStxAddress, register, poolId }) {
           <select
             ref={poolStatus}
             className="form-control"
-            defaultValue={register ? '0' : pool.data['status'].value.toNumber()}
+            defaultValue={register ? '0' : pool.data['status'].value}
             onKeyUp={e => {
               if (e.key === 'Enter') formAction();
             }}

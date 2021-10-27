@@ -40,7 +40,7 @@ export default function PoolInfo({ pool }) {
         <br />
         {pool.data['minimum-ustx'].type === ClarityType.OptionalSome
           ? `Minimum amount required to join: ${
-              pool.data['minimum-ustx'].value.value.toNumber() / 1000000
+              pool.data['minimum-ustx'].value.value / 1000000n
             } STX`
           : 'No minimum STX required.'}
         <br />
