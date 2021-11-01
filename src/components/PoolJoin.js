@@ -117,7 +117,7 @@ export function PoolJoin({ pool, ownerStxAddress, userSession }) {
       ? someCV(uintCV(duration.current.value.trim()))
       : noneCV();
     const payoutAddressCV = getPayoutAddressCV(payout, payoutAddress.current.value.trim());
-    const lockingPeriodCV = uintCV(lockingPeriod.current.value.trim);
+    const lockingPeriodCV = uintCV(lockingPeriod.current.value.trim());
     try {
       setStatus(`Sending transaction`);
       const functionArgs = isSimple
