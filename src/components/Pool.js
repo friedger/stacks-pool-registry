@@ -17,7 +17,7 @@ export function Pool({ pool, poolId, userInfo }) {
   const spinner = useRef();
 
   return (
-    <div>
+    <div className='card m-3 p-2'>
       {pool ? (
         <>
           <PoolInfo pool={pool} />
