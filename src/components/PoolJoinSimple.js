@@ -45,8 +45,8 @@ function getPayoutAddressCV(payout, address) {
       return poxAddrCV(address);
     default:
       return tupleCV({
-        hashbytes: bufferCV(Buffer.from([0])),
-        version: bufferCV(Buffer.from([0])),
+        hashbytes: bufferCV([0]),
+        version: bufferCV([0]),
       });
   }
 }
@@ -188,7 +188,7 @@ export function PoolJoinSimple({ delegatee, ownerStxAddress, userSession }) {
               You have joined the pool {cvToString(delegationState.state.data['delegated-to'])} with{' '}
               <Amount ustx={delegationState.state.data['amount-ustx'].value} />.
               <br />
-              <PoXRevoke userSession={userSession} setStatus={setStatus} setTxId={setTxId}/>
+              <PoXRevoke userSession={userSession} setStatus={setStatus} setTxId={setTxId} />
             </>
           ) : (
             <>You are not delegating to any pool.</>

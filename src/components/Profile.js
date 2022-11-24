@@ -1,15 +1,13 @@
 import { getUserData } from '@stacks/connect-react';
 import { Person } from '@stacks/profile';
 
-import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { fetchAccount, getUsername } from '../lib/account';
+import React, { useState, useEffect } from 'react';
+import { getUsername } from '../lib/account';
 import { useNavigate } from '@reach/router';
 import { fetchPools } from '../lib/pools';
 import PoolInfo from './PoolInfo';
 import { PoXRevoke } from './PoXRevoke';
 import { StxProfile } from './StxProfile';
-
-// Demonstrating BlockstackContext for legacy React Class Components.
 
 export default function Profile({ stxAddresses, userSession }) {
   const [status, setStatus] = useState('');
@@ -127,7 +125,7 @@ export default function Profile({ stxAddresses, userSession }) {
       </div>
       <div className="pt-4">
         If you want to revoke your membership of any pool, you can do it here.
-        <br/>
+        <br />
         <PoXRevoke
           userSession={userSession}
           setStatus={setStatus}

@@ -53,8 +53,8 @@ function getPayoutAddressCV(payout, address) {
       return poxAddrCV(address);
     default:
       return tupleCV({
-        hashbytes: bufferCV(Buffer.from([0])),
-        version: bufferCV(Buffer.from([0])),
+        hashbytes: bufferCV([0]),
+        version: bufferCV([0]),
       });
   }
 }

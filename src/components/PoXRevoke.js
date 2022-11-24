@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useConnect as useStacksJsConnect } from '@stacks/connect-react';
 import { NETWORK } from '../lib/constants';
-import { PostConditionMode } from '@stacks/transactions';
-
+import { bufferCV, PostConditionMode } from '@stacks/transactions';
+import { hexToBytes } from '../lib/pools';
 
 export function PoXRevoke({ userSession, setStatus, setTxId }) {
   const [loading, setLoading] = useState();
