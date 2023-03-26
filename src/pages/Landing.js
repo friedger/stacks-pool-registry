@@ -13,21 +13,7 @@ export default function Landing(props) {
         <div className="container">
           <div className="panel-landing text-center mt-3">
             <h1 className="landing-heading">Pool Registry</h1>
-            <p className="lead">A simple app to join and register Stacking Pools</p>
-
-            <p className="alert alert-info  border-info">
-              Pool Registry is an{' '}
-              <a
-                href="https://github.com/friedger/starter-app"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                open source
-              </a>{' '}
-              web app with the purpose of{' '}
-              <strong>helping everybody quickly find and join a Stacking Pool.</strong>
-            </p>
-
+            <p>This app only works for Stacks 2.0.</p>
             <div className="card mt-4 border-info">
               <div className="card-header">
                 <h5 className="card-title">About Delegated Stacking</h5>
@@ -42,23 +28,32 @@ export default function Landing(props) {
 
             <div className="card mt-4 border-info">
               <div className="card-header">
-                <h5 className="card-title">Pool Registry</h5>
+                <h5 className="card-title">Pool Registry (Stacks 2.0)</h5>
               </div>
               <div className="card-body">
                 <p className="card-text mb-3">
                   Pool Registry is a web interface to the pool registry smart contract{' '}
-                  <a href={`https://explorer.stacks.co/txid/${CONTRACT_ADDRESS}.${POOL_REGISTRY_CONTRACT_NAME}?chain=mainnet`}>
+                  <a
+                    href={`https://explorer.stacks.co/txid/${CONTRACT_ADDRESS}.${POOL_REGISTRY_CONTRACT_NAME}?chain=mainnet`}
+                  >
                     {CONTRACT_ADDRESS}.{POOL_REGISTRY_CONTRACT_NAME}
                   </a>
                   .
                 </p>
               </div>
-
-              <p className="card-link mb-5">
-                <button className="btn btn-outline-primary" type="button" onClick={handleOpenAuth}>
-                  Start now
-                </button>
-              </p>
+            </div>
+            <div className="card mt-4 border-info">
+              <div className="card-header">
+                <h5 className="card-title">New Stacking app</h5>
+              </div>
+              <div className="card-body">
+                <p className="card-text mb-3">
+                  The new stacking app is available at{' '}
+                  <a href="https://github.com/hirosystems/btcweb3">
+                    github.com/hirosystems/btcweb3
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>

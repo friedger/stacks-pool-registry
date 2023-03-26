@@ -73,13 +73,15 @@ function AppBody(props) {
   );
 }
 function Content({ userSession }) {
+  const upgradedToStacks21 = false;
   const authenticated = userSession && userSession.isUserSignedIn();
   const decentralizedID =
     userSession && userSession.isUserSignedIn() && userSession.loadUserData().decentralizedID;
   return (
     <>
-      {!authenticated && <Landing />}
-      {decentralizedID && (
+      {!upgradedToStacks21 ? (
+        <Landing />
+      ) : (
         <>
           <Router>
             <AppBody path="/">
